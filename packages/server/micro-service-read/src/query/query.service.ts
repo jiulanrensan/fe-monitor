@@ -155,7 +155,8 @@ export class QueryService {
     aid: string,
     statusCode: number,
     useGreaterEqual: boolean = true,
-  ): Promise<number> {
+    threshold: number,
+  ): Promise<{ count: number; url: string }[]> {
     // 构建查询条件
     const conditions = [
       `report_time >= '${timeRange.start}'`,
@@ -167,13 +168,16 @@ export class QueryService {
     ];
 
     const whereClause = conditions.join(' AND ');
-    const query = `SELECT COUNT(*) as count FROM ${API_ERROR_HTTP_CODE_TABLE} WHERE ${whereClause}`;
+    const query = `SELECT url, count() AS count FROM ${API_ERROR_HTTP_CODE_TABLE} WHERE ${whereClause} GROUP BY url HAVING count >= ${threshold}`;
 
     this.logger.log(`Executing error http code count query: ${query}`);
 
-    const result = await this.clickHouseService.query<{ count: number }>(query);
+    const result = await this.clickHouseService.query<{
+      count: number;
+      url: string;
+    }>(query);
     this.logger.log(`Query result: ${JSON.stringify(result)}`);
-    return result[0]?.count || 0;
+    return result;
   }
 
   /**
@@ -183,7 +187,8 @@ export class QueryService {
     timeRange: { start: string; end: string },
     aid: string,
     errorCodes: number[],
-  ): Promise<number> {
+    threshold: number,
+  ): Promise<{ count: number; url: string }[]> {
     // 构建查询条件
     const conditions = [
       `report_time >= '${timeRange.start}'`,
@@ -198,12 +203,15 @@ export class QueryService {
     }
 
     const whereClause = conditions.join(' AND ');
-    const query = `SELECT COUNT(*) as count FROM ${API_ERROR_BUSINESS_CODE_TABLE} WHERE ${whereClause}`;
+    const query = `SELECT url, count() AS count FROM ${API_ERROR_BUSINESS_CODE_TABLE} WHERE ${whereClause} GROUP BY url HAVING count >= ${threshold}`;
 
     this.logger.log(`Executing error business code count query: ${query}`);
 
-    const result = await this.clickHouseService.query<{ count: number }>(query);
+    const result = await this.clickHouseService.query<{
+      count: number;
+      url: string;
+    }>(query);
     this.logger.log(`Query result: ${JSON.stringify(result)}`);
-    return result[0]?.count || 0;
+    return result;
   }
 }

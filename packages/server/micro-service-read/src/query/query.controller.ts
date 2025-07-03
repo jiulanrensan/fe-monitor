@@ -234,19 +234,18 @@ export class QueryController {
   async apiErrorHttpCodeCount(@Body() dto: ApiErrorHttpCodeQueryDto) {
     try {
       this.logger.log(
-        `Getting error http code count for app: ${dto.aid}, statusCode: ${dto.statusCode}`,
+        `Getting error http code count for app: ${dto.aid}, statusCode: ${dto.statusCode}, threshold: ${dto.threshold}`,
       );
       const result = await this.queryService.apiErrorHttpCodeCount(
         dto.timeRange,
         dto.aid,
         dto.statusCode,
         dto.useGreaterEqual,
+        dto.threshold,
       );
       return {
         success: true,
-        data: {
-          count: result,
-        },
+        data: result,
       };
     } catch (error) {
       this.logger.error(
@@ -269,17 +268,18 @@ export class QueryController {
   @Post('apiErrorBusinessCodeCount')
   async apiErrorBusinessCodeCount(@Body() dto: ApiErrorBusinessCodeQueryDto) {
     try {
-      this.logger.log(`Getting error business code count for app: ${dto.aid}`);
+      this.logger.log(
+        `Getting error business code count for app: ${dto.aid}, threshold: ${dto.threshold}`,
+      );
       const result = await this.queryService.apiErrorBusinessCodeCount(
         dto.timeRange,
         dto.aid,
         dto.errorCodes,
+        dto.threshold,
       );
       return {
         success: true,
-        data: {
-          count: result,
-        },
+        data: result,
       };
     } catch (error) {
       this.logger.error(

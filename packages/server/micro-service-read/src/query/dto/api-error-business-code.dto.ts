@@ -1,4 +1,10 @@
-import { IsObject, ValidateNested, IsArray, IsNumber } from 'class-validator';
+import {
+  IsObject,
+  ValidateNested,
+  IsArray,
+  IsNumber,
+  Min,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 import { APIDto, TimeRangeDto } from './base.dto';
 
@@ -14,4 +20,8 @@ export class ApiErrorBusinessCodeQueryDto extends APIDto {
   @IsArray()
   @IsNumber({}, { each: true })
   errorCodes: number[];
+
+  @IsNumber()
+  @Min(1, { message: '阈值必须大于等于1' })
+  threshold: number;
 }

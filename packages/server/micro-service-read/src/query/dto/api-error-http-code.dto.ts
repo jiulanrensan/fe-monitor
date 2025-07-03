@@ -29,4 +29,8 @@ export class ApiErrorHttpCodeQueryDto extends APIDto {
    */
   @IsOptional()
   useGreaterEqual?: boolean = true;
+
+  @IsNumber()
+  @Min(1, { message: '阈值必须大于等于1' })
+  threshold: number;
 }
