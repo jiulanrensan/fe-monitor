@@ -25,4 +25,8 @@ export class ApiDurationQueryDto extends APIDto {
   @IsNumber()
   @Min(0, { message: '排队时间必须大于等于0' })
   queueTime: number;
+
+  @IsNumber()
+  @Min(1, { message: '阈值必须大于等于1' })
+  threshold: number;
 }

@@ -168,18 +168,17 @@ export class QueryController {
   async apiDurationCount(@Body() dto: ApiDurationQueryDto) {
     try {
       this.logger.log(
-        `Getting data count for app: ${dto.aid}, duration: ${dto.duration}`,
+        `Getting data count for app: ${dto.aid}, duration: ${dto.duration}, threshold: ${dto.threshold}`,
       );
       const result = await this.queryService.apiDurationCount(
         dto.timeRange,
         dto.duration,
         dto.aid,
+        dto.threshold,
       );
       return {
         success: true,
-        data: {
-          count: result,
-        },
+        data: result,
       };
     } catch (error) {
       this.logger.error(`Get data count failed: ${error.message}`, error.stack);
