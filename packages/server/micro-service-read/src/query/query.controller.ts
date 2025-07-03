@@ -14,6 +14,7 @@ import {
   ExecuteQueryDto,
   AggregationQueryDto,
   ApiDurationQueryDto,
+  ApiBodySizeQueryDto,
 } from './dto';
 
 @Controller('query')
@@ -190,6 +191,41 @@ export class QueryController {
     }
   }
 
+  /**
+   * 查询body大小数据条数
+   */
+  @Post('apiBodySizeCount')
+  async apiBodySizeCount(@Body() dto: ApiBodySizeQueryDto) {
+    try {
+      this.logger.log(
+        `Getting body size count for app: ${dto.aid}, reqBodySize: ${dto.reqBodySize}, resBodySize: ${dto.resBodySize}`,
+      );
+      const result = await this.queryService.apiBodySizeCount(
+        dto.timeRange,
+        dto.aid,
+        dto.reqBodySize,
+        dto.resBodySize,
+      );
+      return {
+        success: true,
+        data: {
+          count: result,
+        },
+      };
+    } catch (error) {
+      this.logger.error(
+        `Get body size count failed: ${error.message}`,
+        error.stack,
+      );
+      throw new HttpException(
+        {
+          success: false,
+          message: `查询body大小数据条数失败: ${error.message}`,
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
   /**
    * 健康检查
    */

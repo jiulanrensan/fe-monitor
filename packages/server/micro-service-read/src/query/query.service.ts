@@ -6,6 +6,15 @@ import { API_EVENT_TYPE, MONITOR_TYPE } from 'src/const/monitor';
 const API_DURATION_TABLE =
   API_EVENT_TYPE[`${MONITOR_TYPE.API}__DURATION`].toLowerCase();
 
+const API_BODY_SIZE_TABLE =
+  API_EVENT_TYPE[`${MONITOR_TYPE.API}__BODY_SIZE`].toLowerCase();
+
+const API_ERROR_HTTP_CODE_TABLE =
+  API_EVENT_TYPE[`${MONITOR_TYPE.API}__ERROR_HTTP_CODE`].toLowerCase();
+
+const API_ERROR_BUSINESS_CODE_TABLE =
+  API_EVENT_TYPE[`${MONITOR_TYPE.API}__ERROR_BUSINESS_CODE`].toLowerCase();
+
 export interface QueryResult<T = any> {
   data: T[];
   total: number;
@@ -97,6 +106,33 @@ export class QueryService {
     const query = `SELECT COUNT(*) as count FROM ${API_DURATION_TABLE} WHERE ${whereClause}`;
 
     this.logger.log(`Executing count query: ${query}`);
+
+    const result = await this.clickHouseService.query<{ count: number }>(query);
+    this.logger.log(`Query result: ${JSON.stringify(result)}`);
+    return result[0]?.count || 0;
+  }
+
+  /**
+   * 查询body大小数据条数
+   */
+  async apiBodySizeCount(
+    timeRange: { start: string; end: string },
+    aid: string,
+    reqBodySize: number,
+    resBodySize: number,
+  ): Promise<number> {
+    // 构建查询条件
+    const conditions = [
+      `report_time >= '${timeRange.start}'`,
+      `report_time <= '${timeRange.end}'`,
+      `aid = '${aid}'`,
+      `(req_body_size >= ${reqBodySize} OR res_body_size >= ${resBodySize})`,
+    ];
+
+    const whereClause = conditions.join(' AND ');
+    const query = `SELECT COUNT(*) as count FROM ${API_BODY_SIZE_TABLE} WHERE ${whereClause}`;
+
+    this.logger.log(`Executing body size count query: ${query}`);
 
     const result = await this.clickHouseService.query<{ count: number }>(query);
     this.logger.log(`Query result: ${JSON.stringify(result)}`);
