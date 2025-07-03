@@ -4,6 +4,7 @@ import { APIDto, TimeRangeDto } from './base.dto';
 
 /**
  * API Body 大小查询 DTO
+ * 请求体size>=reqBodySize 或 响应体size>=resBodySize
  */
 export class ApiBodySizeQueryDto extends APIDto {
   @IsObject()

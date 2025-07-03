@@ -8,6 +8,7 @@ export { TimeRangeDto, APIDto } from './base.dto';
 // 导出所有业务 DTO 类
 export { ApiDurationQueryDto } from './api-duration.dto';
 export { ApiBodySizeQueryDto } from './api-body-size.dto';
+export { ApiErrorHttpCodeQueryDto } from './api-error-http-code.dto';
 export { ExecuteQueryDto } from './execute-query.dto';
 export { AggregationQueryDto } from './aggregation-query.dto';
 

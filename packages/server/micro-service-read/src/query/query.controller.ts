@@ -15,6 +15,7 @@ import {
   AggregationQueryDto,
   ApiDurationQueryDto,
   ApiBodySizeQueryDto,
+  ApiErrorHttpCodeQueryDto,
 } from './dto';
 
 @Controller('query')
@@ -221,6 +222,42 @@ export class QueryController {
         {
           success: false,
           message: `查询body大小数据条数失败: ${error.message}`,
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  /**
+   * 查询错误http状态码数据条数
+   */
+  @Post('apiErrorHttpCodeCount')
+  async apiErrorHttpCodeCount(@Body() dto: ApiErrorHttpCodeQueryDto) {
+    try {
+      this.logger.log(
+        `Getting error http code count for app: ${dto.aid}, statusCode: ${dto.statusCode}`,
+      );
+      const result = await this.queryService.apiErrorHttpCodeCount(
+        dto.timeRange,
+        dto.aid,
+        dto.statusCode,
+        dto.useGreaterEqual,
+      );
+      return {
+        success: true,
+        data: {
+          count: result,
+        },
+      };
+    } catch (error) {
+      this.logger.error(
+        `Get error http code count failed: ${error.message}`,
+        error.stack,
+      );
+      throw new HttpException(
+        {
+          success: false,
+          message: `查询错误HTTP状态码数据条数失败: ${error.message}`,
         },
         HttpStatus.INTERNAL_SERVER_ERROR,
       );

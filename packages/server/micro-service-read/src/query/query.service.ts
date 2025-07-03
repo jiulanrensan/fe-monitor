@@ -138,4 +138,33 @@ export class QueryService {
     this.logger.log(`Query result: ${JSON.stringify(result)}`);
     return result[0]?.count || 0;
   }
+
+  /**
+   * 查询错误http状态码数据条数
+   */
+  async apiErrorHttpCodeCount(
+    timeRange: { start: string; end: string },
+    aid: string,
+    statusCode: number,
+    useGreaterEqual: boolean = true,
+  ): Promise<number> {
+    // 构建查询条件
+    const conditions = [
+      `report_time >= '${timeRange.start}'`,
+      `report_time <= '${timeRange.end}'`,
+      `aid = '${aid}'`,
+      useGreaterEqual
+        ? `status_code >= ${statusCode}`
+        : `status_code = ${statusCode}`,
+    ];
+
+    const whereClause = conditions.join(' AND ');
+    const query = `SELECT COUNT(*) as count FROM ${API_ERROR_HTTP_CODE_TABLE} WHERE ${whereClause}`;
+
+    this.logger.log(`Executing error http code count query: ${query}`);
+
+    const result = await this.clickHouseService.query<{ count: number }>(query);
+    this.logger.log(`Query result: ${JSON.stringify(result)}`);
+    return result[0]?.count || 0;
+  }
 }
