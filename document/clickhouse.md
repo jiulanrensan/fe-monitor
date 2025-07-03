@@ -5,22 +5,48 @@
 ```shell
 # 拉取
 docker pull clickhouse/clickhouse-server
+```
 
+## 连接 Docker 中运行的 ClickHouse
+
+```shell
 # 启动服务器实例
-docker run -d --name some-clickhouse-server --ulimit nofile=262144:262144 clickhouse/clickhouse-server
+# docker run -d \
+#   --name some-clickhouse-server \
+#   --ulimit nofile=262144:262144 \
+#   -p 8123:8123 \     # 映射 HTTP 端口
+#   -p 9000:9000 \     # 映射 TCP 端口
+#   clickhouse/clickhouse-server
+docker run -d --name some-clickhouse-server --ulimit nofile=262144:262144 -p 8123:8123 -p 9000:9000 clickhouse/clickhouse-server
+
+# 验证端口映射
+docker ps
+# 输出
+
+CONTAINER ID   IMAGE                          COMMAND            CREATED          STATUS          PORTS                                                      NAMES
+544fdf7b15a3   clickhouse/clickhouse-server   "/entrypoint.sh"   13 seconds ago   Up 11 seconds   0.0.0.0:8123->8123/tcp, 0.0.0.0:9000->9000/tcp, 9009/tcp   some-clickhouse-server
+
+# 从本地客户端连接
+docker exec -it some-clickhouse-server clickhouse-client
+
+# 在 Postman 中访问
+# 创建账户见下方
+http://localhost:8123/?query=SELECT%20version()&user=fre_monitor_user&password=Password123!
+# 或
+http://127.0.0.1:8123/?query=SELECT%20version()&user=fre_monitor_user&password=Password123!
+
+# 输出版本号即为配置成功
+
+# 使用接口查询
+# 以json格式返回10条数据
+curl --location 'http://127.0.0.1:8123/?database=fre_monitor_db' \
+  --user 'fre_monitor_user:Password123!' \
+  --data-binary 'SELECT * FROM test LIMIT 10 FORMAT JSON'
 ```
 
 默认情况下，ClickHouse 只能通过 Docker 网络访问
 默认情况下，启动的上述服务器实例将作为 `default` 用户运行，无需密码
-
-```shell
-# 从本地客户端连接
-docker exec -it some-clickhouse-server clickhouse-client
-```
-
 此时进入client服务，可以执行sql语句
-
-## 连接 Docker 中运行的 ClickHouse
 
 ## 用户操作
 
@@ -116,38 +142,56 @@ CREATE TABLE default.slow_request
     duration Float64,
     sid String,
     timestamp DateTime,
-    userid String
+    userid String,
+
+    INDEX duration_idx duration TYPE minmax GRANULARITY 4,
+    INDEX url_idx url TYPE tokenbf_v1(32768, 3, 0) GRANULARITY 2
 )
 ENGINE = MergeTree()
-ORDER BY (timestamp, userid);
+PARTITION BY toYYYYMMDD(timestamp)
+ORDER BY (appname, type, timestamp)
+TTL timestamp + INTERVAL 7 DAY
+SETTINGS index_granularity = 8192;
 ```
 
-执行结果
+#### 字段解释
 
-```
-Query id: 448305f4-f523-4352-b06f-cd4d38c00934
+```shell
+# 数据过期策略
+# 自动删除超过7天的数据
+# ClickHouse后台自动执行清理，无需人工干预
+TTL timestamp + INTERVAL 7 DAY
 
-Ok.
+# 分区策略
+# 按天分区（根据时间戳字段）
+# 提升时间范围查询效率
+# 加速过期数据删除速度
+PARTITION BY toYYYYMMDD(timestamp)
 
-0 rows in set. Elapsed: 0.010 sec.
+# 主键索引
+# 优化按应用名(appname)和错误类型(type)的查询
+# 时间戳作为第三排序键加速时间范围查询
+ORDER BY (appname, type, timestamp)
+
+# 参数调优
+# 适用于中等规模数据集（单日百万级记录）
+# 平衡查询性能和内存消耗
+SETTINGS index_granularity = 8192
+
+# 二级索引增强
+# 针对性能指标duration的minmax索引
+# 加速慢查询分析（如 WHERE duration > 3.0）
+INDEX duration_idx duration TYPE minmax GRANULARITY 4
+
+# 布隆过滤器索引优化URL模糊查询
+# 支持 WHERE url LIKE '%/api/%' 类查询
+INDEX url_idx url TYPE tokenbf_v1(32768, 3, 0) GRANULARITY 2
 ```
 
 ### 存在某个表
 
 ```shell
 EXISTS TABLE slow_request;
-```
-
-执行结果
-
-```
-Query id: e42d158c-063d-4f86-8c34-19f426719547
-
-   ┌─result─┐
-1. │      1 │
-   └────────┘
-
-1 row in set. Elapsed: 0.001 sec.
 ```
 
 ### 插入数据
