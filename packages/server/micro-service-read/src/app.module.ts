@@ -4,9 +4,10 @@ import { AppService } from './app.service';
 import { ClickHouseModule } from './clickhouse/clickhouse.module';
 import { ClickHouseHealthService } from './clickhouse/clickhouse-health.service';
 import { QueryModule } from './query/query.module';
+import { SchedulerModule } from './scheduler/scheduler.module';
 
 @Module({
-  imports: [ClickHouseModule, QueryModule],
+  imports: [ClickHouseModule, QueryModule, SchedulerModule],
   controllers: [AppController],
   providers: [AppService],
 })
