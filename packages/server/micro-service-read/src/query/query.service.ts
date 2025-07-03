@@ -167,4 +167,35 @@ export class QueryService {
     this.logger.log(`Query result: ${JSON.stringify(result)}`);
     return result[0]?.count || 0;
   }
+
+  /**
+   * 查询错误业务码数据条数
+   */
+  async apiErrorBusinessCodeCount(
+    timeRange: { start: string; end: string },
+    aid: string,
+    errorCodes: number[],
+  ): Promise<number> {
+    // 构建查询条件
+    const conditions = [
+      `report_time >= '${timeRange.start}'`,
+      `report_time <= '${timeRange.end}'`,
+      `aid = '${aid}'`,
+    ];
+
+    // 如果提供了错误码数组，添加错误码条件
+    if (errorCodes && errorCodes.length > 0) {
+      const errorCodeList = errorCodes.map((code) => `${code}`).join(',');
+      conditions.push(`error_code IN (${errorCodeList})`);
+    }
+
+    const whereClause = conditions.join(' AND ');
+    const query = `SELECT COUNT(*) as count FROM ${API_ERROR_BUSINESS_CODE_TABLE} WHERE ${whereClause}`;
+
+    this.logger.log(`Executing error business code count query: ${query}`);
+
+    const result = await this.clickHouseService.query<{ count: number }>(query);
+    this.logger.log(`Query result: ${JSON.stringify(result)}`);
+    return result[0]?.count || 0;
+  }
 }

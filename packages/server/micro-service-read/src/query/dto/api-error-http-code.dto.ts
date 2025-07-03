@@ -24,6 +24,9 @@ export class ApiErrorHttpCodeQueryDto extends APIDto {
   @Min(400, { message: 'HTTP状态码必须大于等于400' })
   declare statusCode: number;
 
+  /**
+   * 是否使用大于等于，默认true
+   */
   @IsOptional()
   useGreaterEqual?: boolean = true;
 }

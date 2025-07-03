@@ -16,6 +16,7 @@ import {
   ApiDurationQueryDto,
   ApiBodySizeQueryDto,
   ApiErrorHttpCodeQueryDto,
+  ApiErrorBusinessCodeQueryDto,
 } from './dto';
 
 @Controller('query')
@@ -263,6 +264,40 @@ export class QueryController {
       );
     }
   }
+
+  /**
+   * 查询错误业务码数据条数
+   */
+  @Post('apiErrorBusinessCodeCount')
+  async apiErrorBusinessCodeCount(@Body() dto: ApiErrorBusinessCodeQueryDto) {
+    try {
+      this.logger.log(`Getting error business code count for app: ${dto.aid}`);
+      const result = await this.queryService.apiErrorBusinessCodeCount(
+        dto.timeRange,
+        dto.aid,
+        dto.errorCodes,
+      );
+      return {
+        success: true,
+        data: {
+          count: result,
+        },
+      };
+    } catch (error) {
+      this.logger.error(
+        `Get error business code count failed: ${error.message}`,
+        error.stack,
+      );
+      throw new HttpException(
+        {
+          success: false,
+          message: `查询错误业务码数据条数失败: ${error.message}`,
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
   /**
    * 健康检查
    */
