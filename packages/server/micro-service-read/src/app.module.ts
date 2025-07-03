@@ -3,9 +3,10 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ClickHouseModule } from './clickhouse/clickhouse.module';
 import { ClickHouseHealthService } from './clickhouse/clickhouse-health.service';
+import { QueryModule } from './query/query.module';
 
 @Module({
-  imports: [ClickHouseModule],
+  imports: [ClickHouseModule, QueryModule],
   controllers: [AppController],
   providers: [AppService],
 })
