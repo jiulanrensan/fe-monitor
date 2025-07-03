@@ -29,6 +29,12 @@ importers:
       dotenv:
         specifier: ^16.6.1
         version: 16.6.1
+      reflect-metadata:
+        specifier: ^0.2.2
+        version: 0.2.2
+      rxjs:
+        specifier: ^7.8.2
+        version: 7.8.2
     devDependencies:
       '@commitlint/cli':
         specifier: ^19.4.0
@@ -93,11 +99,13 @@ importers:
 
   packages/common: {}
 
+  packages/shared: {}
+
   packages/wechat-sdk:
     dependencies:
-      '@fe-monitor/common':
+      '@fe-monitor/shared':
         specifier: workspace:^1.0.0
-        version: link:../common
+        version: link:../shared
 
 packages:
 
