@@ -19,4 +19,8 @@ export class ApiBodySizeQueryDto extends APIDto {
   @IsNumber()
   @Min(0, { message: '响应体大小必须大于等于0' })
   resBodySize: number;
+
+  @IsNumber()
+  @Min(1, { message: '阈值必须大于等于1' })
+  threshold: number;
 }

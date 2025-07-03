@@ -199,19 +199,18 @@ export class QueryController {
   async apiBodySizeCount(@Body() dto: ApiBodySizeQueryDto) {
     try {
       this.logger.log(
-        `Getting body size count for app: ${dto.aid}, reqBodySize: ${dto.reqBodySize}, resBodySize: ${dto.resBodySize}`,
+        `Getting body size count for app: ${dto.aid}, reqBodySize: ${dto.reqBodySize}, resBodySize: ${dto.resBodySize}, threshold: ${dto.threshold}`,
       );
       const result = await this.queryService.apiBodySizeCount(
         dto.timeRange,
         dto.aid,
         dto.reqBodySize,
         dto.resBodySize,
+        dto.threshold,
       );
       return {
         success: true,
-        data: {
-          count: result,
-        },
+        data: result,
       };
     } catch (error) {
       this.logger.error(

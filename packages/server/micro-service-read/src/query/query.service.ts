@@ -124,7 +124,8 @@ export class QueryService {
     aid: string,
     reqBodySize: number,
     resBodySize: number,
-  ): Promise<number> {
+    threshold: number,
+  ): Promise<{ count: number; url: string }[]> {
     // 构建查询条件
     const conditions = [
       `report_time >= '${timeRange.start}'`,
@@ -134,13 +135,16 @@ export class QueryService {
     ];
 
     const whereClause = conditions.join(' AND ');
-    const query = `SELECT COUNT(*) as count FROM ${API_BODY_SIZE_TABLE} WHERE ${whereClause}`;
+    const query = `SELECT url, count() AS count FROM ${API_BODY_SIZE_TABLE} WHERE ${whereClause} GROUP BY url HAVING count >= ${threshold}`;
 
     this.logger.log(`Executing body size count query: ${query}`);
 
-    const result = await this.clickHouseService.query<{ count: number }>(query);
+    const result = await this.clickHouseService.query<{
+      count: number;
+      url: string;
+    }>(query);
     this.logger.log(`Query result: ${JSON.stringify(result)}`);
-    return result[0]?.count || 0;
+    return result;
   }
 
   /**
