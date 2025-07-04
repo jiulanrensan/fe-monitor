@@ -16,7 +16,7 @@ import {
   RemoveEventDto,
   CheckEventExistsDto,
   TriggerEventDto,
-} from '../dto';
+} from './scheduler.dto';
 
 @Controller('scheduler')
 export class SchedulerController {
