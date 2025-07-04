@@ -40,6 +40,27 @@ export class EventRegistry {
   }
 
   /**
+   * 移除监控事件
+   */
+  removeEvent(eventName: string): boolean {
+    const hasEvent = this.events.has(eventName);
+    if (hasEvent) {
+      this.events.delete(eventName);
+      this.logger.log(`Removed event: ${eventName}`);
+    } else {
+      this.logger.warn(`Event ${eventName} not found, cannot remove`);
+    }
+    return hasEvent;
+  }
+
+  /**
+   * 检查事件是否存在
+   */
+  hasEvent(eventName: string): boolean {
+    return this.events.has(eventName);
+  }
+
+  /**
    * 执行所有注册的事件
    */
   async executeAllEvents(): Promise<void> {

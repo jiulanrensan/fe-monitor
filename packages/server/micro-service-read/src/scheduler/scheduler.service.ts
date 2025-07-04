@@ -248,4 +248,52 @@ export class SchedulerService implements OnModuleInit {
     this.logger.log(`Manually triggering monitor: ${eventName}`);
     return this.eventRegistry.executeEvent(eventName);
   }
+
+  /**
+   * 注册内置的监控事件
+   */
+  async registerMonitorEvent(eventName: string): Promise<void> {
+    this.logger.log(`Registering built-in monitor event: ${eventName}`);
+
+    // 查找内置的监控事件
+    const builtInEvent = this.monitorEvents.find(
+      (event) => event.name === eventName,
+    );
+
+    if (!builtInEvent) {
+      throw new Error(`内置监控事件 ${eventName} 不存在`);
+    }
+
+    // 检查事件是否已经注册
+    if (this.eventRegistry.hasEvent(eventName)) {
+      throw new Error(`监控事件 ${eventName} 已经注册`);
+    }
+
+    this.eventRegistry.registerEvent(builtInEvent);
+  }
+
+  /**
+   * 移除监控事件
+   */
+  async removeMonitorEvent(eventName: string): Promise<boolean> {
+    this.logger.log(`Removing monitor event: ${eventName}`);
+    return this.eventRegistry.removeEvent(eventName);
+  }
+
+  /**
+   * 检查监控事件是否存在
+   */
+  async hasMonitorEvent(eventName: string): Promise<boolean> {
+    return this.eventRegistry.hasEvent(eventName);
+  }
+
+  /**
+   * 获取所有内置监控事件列表
+   */
+  async getBuiltInEvents(): Promise<{ name: string; description: string }[]> {
+    return this.monitorEvents.map((event) => ({
+      name: event.name,
+      description: event.description,
+    }));
+  }
 }
