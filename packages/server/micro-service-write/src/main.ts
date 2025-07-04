@@ -4,7 +4,7 @@ import { Logger } from '@nestjs/common';
 import * as dotenv from 'dotenv';
 
 // 加载环境变量
-dotenv.config({ path: '../../.env' });
+dotenv.config({ path: '../.env' });
 
 async function bootstrap() {
   const logger = new Logger('Bootstrap');
@@ -18,7 +18,8 @@ async function bootstrap() {
   });
   const app = await NestFactory.create(AppModule);
 
-  await app.listen(process.env.PORT ?? 3000);
-  logger.log(`Write service running on: ${await app.getUrl()}`);
+  const port = process.env.PORT ?? 3000;
+  await app.listen(port);
+  logger.log(`Write service running on: http://127.0.0.1:${port}`);
 }
 bootstrap();
