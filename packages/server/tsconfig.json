@@ -17,5 +17,7 @@
     "noImplicitAny": false,
     "strictBindCallApply": false,
     "noFallthroughCasesInSwitch": false
-  }
+  },
+  "include": ["micro-service-read/src/**/*", "micro-service-write/src/**/*", "shared/**/*"],
+  "exclude": ["node_modules", "dist"]
 }

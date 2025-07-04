@@ -1,0 +1,24 @@
+{
+    "$schema": "https://json.schemastore.org/nest-cli",
+    "collection": "@nestjs/schematics",
+    "projects": {
+        "micro-service-read": {
+            "type": "application",
+            "root": "micro-service-read",
+            "entryFile": "main",
+            "sourceRoot": "micro-service-read/src",
+            "compilerOptions": {
+                "deleteOutDir": true
+            }
+        },
+        "micro-service-write": {
+            "type": "application",
+            "root": "micro-service-write",
+            "entryFile": "main",
+            "sourceRoot": "micro-service-write/src",
+            "compilerOptions": {
+                "deleteOutDir": true
+            }
+        }
+    }
+}

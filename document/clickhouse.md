@@ -74,7 +74,13 @@ IDENTIFIED WITH double_sha1_hash BY 'your_double_sha1_hash';
 3. 为新用户分配权限
 
 ```shell
+# 查询权限
 GRANT SELECT ON my_database.* TO fre_monitor_user
+```
+
+```shell
+# 插入权限
+GRANT INSERT ON my_database.* TO fre_monitor_user;
 ```
 
 4. 查看所有用户
@@ -226,7 +232,15 @@ LIMIT 10 OFFSET 10; # LIMIT 10 表示每页返回 10 条数据；OFFSET 10 表�
 ### 新增字段
 
 ```shell
-ALTER TABLE my_table ADD COLUMN new_column String;
+ALTER TABLE fre_monitor_db.api__body_size
+ADD COLUMN new_field String AFTER model;
+```
+
+### 修改字段
+
+```shell
+ALTER TABLE fre_monitor_db.api__body_size
+MODIFY COLUMN new_field Int32;
 ```
 
 ### 查看所有表

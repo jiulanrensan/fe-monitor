@@ -1,17 +1,28 @@
-# 开发环境 Dockerfile
+﻿# 开发环境 Dockerfile
 FROM node:18-alpine
+
+# 安装 pnpm
+RUN npm install -g pnpm
 
 WORKDIR /app
 
-# 复制依赖文件并安装
+# 复制根目录的依赖文件
 COPY package*.json ./
-RUN npm install
+COPY pnpm-lock.yaml ./
+COPY packages/server/tsconfig.json ./
+COPY packages/server/nest-cli.json ./
+
+# 安装依赖（使用锁文件确保版本一致）
+RUN pnpm install --frozen-lockfile
 
 # 复制源代码
-COPY . .
+COPY packages/server ./
+
+# 构建项目
+RUN pnpm run build:read
 
 # 暴露端口
 EXPOSE 3001
 
 # 启动命令
-CMD ["npm", "run", "start:dev"]
+CMD ["pnpm", "run", "start:read:prod"]
