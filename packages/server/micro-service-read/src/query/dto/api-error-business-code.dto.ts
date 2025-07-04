@@ -4,6 +4,7 @@ import {
   IsArray,
   IsNumber,
   Min,
+  IsString,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { APIDto, TimeRangeDto } from './base.dto';
@@ -24,4 +25,18 @@ export class ApiErrorBusinessCodeQueryDto extends APIDto {
   @IsNumber()
   @Min(1, { message: '阈值必须大于等于1' })
   threshold: number;
+}
+
+/**
+ * API 业务错误码查询响应 DTO
+ */
+export class ApiErrorBusinessCodeResponseDto {
+  @IsString()
+  url: string;
+
+  @IsNumber()
+  count: number;
+
+  @IsNumber()
+  error_code?: number;
 }

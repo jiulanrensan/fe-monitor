@@ -1,4 +1,10 @@
-import { IsNumber, IsObject, ValidateNested, Min } from 'class-validator';
+import {
+  IsNumber,
+  IsObject,
+  ValidateNested,
+  Min,
+  IsString,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 import { APIDto, TimeRangeDto } from './base.dto';
 
@@ -23,4 +29,21 @@ export class ApiBodySizeQueryDto extends APIDto {
   @IsNumber()
   @Min(1, { message: '阈值必须大于等于1' })
   threshold: number;
+}
+
+/**
+ * API Body Size 查询响应 DTO
+ */
+export class ApiBodySizeResponseDto {
+  @IsString()
+  url: string;
+
+  @IsNumber()
+  count: number;
+
+  @IsNumber()
+  median_req_body_size: number;
+
+  @IsNumber()
+  median_res_body_size: number;
 }

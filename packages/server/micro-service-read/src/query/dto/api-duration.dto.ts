@@ -4,6 +4,7 @@ import {
   ValidateNested,
   Min,
   IsOptional,
+  IsString,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { APIDto, TimeRangeDto } from './base.dto';
@@ -29,4 +30,24 @@ export class ApiDurationQueryDto extends APIDto {
   @IsNumber()
   @Min(1, { message: '阈值必须大于等于1' })
   threshold: number;
+}
+
+/**
+ * API 持续时间查询响应 DTO
+ */
+export class ApiDurationResponseDto {
+  @IsString()
+  url: string;
+
+  @IsNumber()
+  count: number;
+
+  @IsNumber()
+  median_duration: number;
+
+  @IsNumber()
+  p95_duration: number;
+
+  @IsNumber()
+  p99_duration: number;
 }

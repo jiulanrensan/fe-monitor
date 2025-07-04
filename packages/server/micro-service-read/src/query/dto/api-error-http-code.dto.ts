@@ -4,6 +4,7 @@ import {
   ValidateNested,
   Min,
   IsOptional,
+  IsString,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { APIDto, TimeRangeDto } from './base.dto';
@@ -33,4 +34,18 @@ export class ApiErrorHttpCodeQueryDto extends APIDto {
   @IsNumber()
   @Min(1, { message: '阈值必须大于等于1' })
   threshold: number;
+}
+
+/**
+ * API 错误 HTTP 状态码查询响应 DTO
+ */
+export class ApiErrorHttpCodeResponseDto {
+  @IsString()
+  url: string;
+
+  @IsNumber()
+  count: number;
+
+  @IsNumber()
+  status_code?: number;
 }
