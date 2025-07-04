@@ -133,6 +133,7 @@ CREATE TABLE fre_monitor_db.api__error_business_code
     url String CODEC(ZSTD(5)),
     method LowCardinality(String),
     status_code UInt16 COMMENT 'HTTP 状态码',
+    error_code UInt16 COMMENT '业务异常码'
     error_reason String COMMENT '失败原因',
     model LowCardinality(String) COMMENT '机型',
     create_time DateTime DEFAULT now() COMMENT '插入表时间，INSERT时通过now()创建',
@@ -145,4 +146,22 @@ PARTITION BY toYYYYMMDD(report_time)
 ORDER BY (report_time, aid)
 TTL report_time + INTERVAL 7 DAY
 SETTINGS index_granularity = 8192;
+```
+
+# 告警sql
+
+```shell
+SELECT
+    url,
+    count() AS count,
+    quantile(0.50)(duration) AS median,
+    quantile(0.95)(duration) AS p95,
+    quantile(0.99)(duration) AS p99
+FROM fre_monitor_db.api__duration
+WHERE report_time >= '2025-07-03 00:00:00'
+AND report_time <= '2025-07-03 23:59:59'
+AND aid = 'app_001'
+AND duration >= 200
+GROUP BY url
+HAVING count > 2
 ```

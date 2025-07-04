@@ -1,6 +1,12 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ClickHouseService } from '../clickhouse/clickhouse.service';
-import { QueryOptions } from './dto';
+import {
+  QueryOptions,
+  ApiDurationResponseDto,
+  ApiBodySizeResponseDto,
+  ApiErrorHttpCodeResponseDto,
+  ApiErrorBusinessCodeResponseDto,
+} from './dto';
 import { API_EVENT_TYPE, MONITOR_TYPE } from 'src/const/monitor';
 
 const API_DURATION_TABLE =
@@ -14,13 +20,6 @@ const API_ERROR_HTTP_CODE_TABLE =
 
 const API_ERROR_BUSINESS_CODE_TABLE =
   API_EVENT_TYPE[`${MONITOR_TYPE.API}__ERROR_BUSINESS_CODE`].toLowerCase();
-
-export interface QueryResult<T = any> {
-  data: T[];
-  total: number;
-  limit: number;
-  offset: number;
-}
 
 @Injectable()
 export class QueryService {
@@ -94,7 +93,7 @@ export class QueryService {
     duration: number,
     aid: string,
     threshold: number,
-  ): Promise<{ count: number; url: string }[]> {
+  ): Promise<ApiDurationResponseDto[]> {
     // 构建查询条件
     const conditions = [
       `report_time >= '${timeRange.start}'`,
@@ -104,14 +103,17 @@ export class QueryService {
     ];
 
     const whereClause = conditions.join(' AND ');
-    const query = `SELECT url, count() AS count FROM ${API_DURATION_TABLE} WHERE ${whereClause} GROUP BY url HAVING count >= ${threshold}`;
+    const query = `
+      SELECT url, count() AS count,
+      quantile(0.50)(duration) AS median_duration,
+      quantile(0.95)(duration) AS p95_duration,
+      quantile(0.99)(duration) AS p99_duration
+      FROM ${API_DURATION_TABLE} WHERE ${whereClause} GROUP BY url HAVING count >= ${threshold}`;
 
     this.logger.log(`Executing count query: ${query}`);
 
-    const result = await this.clickHouseService.query<{
-      count: number;
-      url: string;
-    }>(query);
+    const result =
+      await this.clickHouseService.query<ApiDurationResponseDto>(query);
     this.logger.log(`Query result: ${JSON.stringify(result)}`);
     return result;
   }
@@ -125,7 +127,7 @@ export class QueryService {
     reqBodySize: number,
     resBodySize: number,
     threshold: number,
-  ): Promise<{ count: number; url: string }[]> {
+  ): Promise<ApiBodySizeResponseDto[]> {
     // 构建查询条件
     const conditions = [
       `report_time >= '${timeRange.start}'`,
@@ -135,14 +137,15 @@ export class QueryService {
     ];
 
     const whereClause = conditions.join(' AND ');
-    const query = `SELECT url, count() AS count FROM ${API_BODY_SIZE_TABLE} WHERE ${whereClause} GROUP BY url HAVING count >= ${threshold}`;
+    const query = `SELECT url, count() AS count,
+    quantile(0.50)(req_body_size) AS median_req_body_size,
+    quantile(0.50)(res_body_size) AS median_res_body_size
+    FROM ${API_BODY_SIZE_TABLE} WHERE ${whereClause} GROUP BY url HAVING count >= ${threshold}`;
 
     this.logger.log(`Executing body size count query: ${query}`);
 
-    const result = await this.clickHouseService.query<{
-      count: number;
-      url: string;
-    }>(query);
+    const result =
+      await this.clickHouseService.query<ApiBodySizeResponseDto>(query);
     this.logger.log(`Query result: ${JSON.stringify(result)}`);
     return result;
   }
@@ -156,7 +159,7 @@ export class QueryService {
     statusCode: number,
     useGreaterEqual: boolean = true,
     threshold: number,
-  ): Promise<{ count: number; url: string }[]> {
+  ): Promise<ApiErrorHttpCodeResponseDto[]> {
     // 构建查询条件
     const conditions = [
       `report_time >= '${timeRange.start}'`,
@@ -172,10 +175,8 @@ export class QueryService {
 
     this.logger.log(`Executing error http code count query: ${query}`);
 
-    const result = await this.clickHouseService.query<{
-      count: number;
-      url: string;
-    }>(query);
+    const result =
+      await this.clickHouseService.query<ApiErrorHttpCodeResponseDto>(query);
     this.logger.log(`Query result: ${JSON.stringify(result)}`);
     return result;
   }
@@ -188,7 +189,7 @@ export class QueryService {
     aid: string,
     errorCodes: number[],
     threshold: number,
-  ): Promise<{ count: number; url: string }[]> {
+  ): Promise<ApiErrorBusinessCodeResponseDto[]> {
     // 构建查询条件
     const conditions = [
       `report_time >= '${timeRange.start}'`,
@@ -207,10 +208,10 @@ export class QueryService {
 
     this.logger.log(`Executing error business code count query: ${query}`);
 
-    const result = await this.clickHouseService.query<{
-      count: number;
-      url: string;
-    }>(query);
+    const result =
+      await this.clickHouseService.query<ApiErrorBusinessCodeResponseDto>(
+        query,
+      );
     this.logger.log(`Query result: ${JSON.stringify(result)}`);
     return result;
   }
