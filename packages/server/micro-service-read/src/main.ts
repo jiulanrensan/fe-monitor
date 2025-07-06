@@ -19,7 +19,8 @@ async function bootstrap() {
     CLICKHOUSE_PORT: process.env.CLICKHOUSE_PORT,
     CLICKHOUSE_USER: process.env.CLICKHOUSE_USER,
     CLICKHOUSE_PASSWORD: process.env.CLICKHOUSE_PASSWORD,
-    CLICKHOUSE_DB: process.env.CLICKHOUSE_DB
+    CLICKHOUSE_DB: process.env.CLICKHOUSE_DB,
+    READ_SERVICE_PORT: process.env.READ_SERVICE_PORT
   })
   const app = await NestFactory.create(AppModule)
 
@@ -42,7 +43,7 @@ async function bootstrap() {
     })
   )
 
-  const port = process.env.PORT ?? 3000
+  const port = process.env.READ_SERVICE_PORT ?? 3000
   await app.listen(port)
   logger.log(`Read service running on: http://127.0.0.1:${port}`)
 }
