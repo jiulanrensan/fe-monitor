@@ -4,19 +4,19 @@
  * 这个文件展示了如何添加新的监控事件到现有的定时任务系统中
  */
 
-import { Injectable, Logger } from '@nestjs/common';
-import { EventRegistry } from './event-registry';
-import { AlertService } from './alert.service';
-import { QueryService } from '../query/query.service';
+import { Injectable, Logger } from '@nestjs/common'
+import { EventRegistry } from './event-registry'
+import { AlertService } from './alert.service'
+import { QueryService } from '../query/query.service'
 
 @Injectable()
 export class ExampleExtensionService {
-  private readonly logger = new Logger(ExampleExtensionService.name);
+  private readonly logger = new Logger(ExampleExtensionService.name)
 
   constructor(
     private readonly eventRegistry: EventRegistry,
     private readonly alertService: AlertService,
-    private readonly queryService: QueryService,
+    private readonly queryService: QueryService
   ) {}
 
   /**
@@ -27,22 +27,22 @@ export class ExampleExtensionService {
     this.eventRegistry.registerEvent({
       name: 'api-call-frequency-monitor',
       description: '监控API调用频率异常',
-      handler: () => this.monitorApiCallFrequency(),
-    });
+      handler: () => this.monitorApiCallFrequency()
+    })
 
     // 示例2：监控数据库连接数
     this.eventRegistry.registerEvent({
       name: 'database-connection-monitor',
       description: '监控数据库连接数异常',
-      handler: () => this.monitorDatabaseConnections(),
-    });
+      handler: () => this.monitorDatabaseConnections()
+    })
 
     // 示例3：监控内存使用率
     this.eventRegistry.registerEvent({
       name: 'memory-usage-monitor',
       description: '监控内存使用率异常',
-      handler: () => this.monitorMemoryUsage(),
-    });
+      handler: () => this.monitorMemoryUsage()
+    })
   }
 
   /**
@@ -50,13 +50,13 @@ export class ExampleExtensionService {
    */
   private async monitorApiCallFrequency(): Promise<void> {
     try {
-      const now = new Date();
-      const tenMinutesAgo = new Date(now.getTime() - 10 * 60 * 1000);
+      const now = new Date()
+      const tenMinutesAgo = new Date(now.getTime() - 10 * 60 * 1000)
 
       const timeRange = {
         start: tenMinutesAgo.toISOString(),
-        end: now.toISOString(),
-      };
+        end: now.toISOString()
+      }
 
       // 这里可以调用自定义的查询方法
       // const result = await this.queryService.customQuery(timeRange);
@@ -64,22 +64,19 @@ export class ExampleExtensionService {
       // 模拟结果
       const result = [
         { url: '/api/users', count: 1000 },
-        { url: '/api/orders', count: 500 },
-      ];
+        { url: '/api/orders', count: 500 }
+      ]
 
       if (this.alertService.shouldAlert(result)) {
         await this.alertService.handleAlert({
           eventName: 'api-call-frequency-monitor',
           data: result,
           timestamp: now.toISOString(),
-          description: `发现${result.length}个API接口调用频率异常`,
-        });
+          description: `发现${result.length}个API接口调用频率异常`
+        })
       }
     } catch (error) {
-      this.logger.error(
-        `API call frequency monitor failed: ${error.message}`,
-        error.stack,
-      );
+      this.logger.error(`API call frequency monitor failed: ${error.message}`, error.stack)
     }
   }
 
@@ -91,22 +88,19 @@ export class ExampleExtensionService {
       // 这里可以添加数据库连接数监控逻辑
       const result = [
         { database: 'clickhouse', connections: 50 },
-        { database: 'mysql', connections: 30 },
-      ];
+        { database: 'mysql', connections: 30 }
+      ]
 
       if (this.alertService.shouldAlert(result)) {
         await this.alertService.handleAlert({
           eventName: 'database-connection-monitor',
           data: result,
           timestamp: new Date().toISOString(),
-          description: `发现${result.length}个数据库连接数异常`,
-        });
+          description: `发现${result.length}个数据库连接数异常`
+        })
       }
     } catch (error) {
-      this.logger.error(
-        `Database connection monitor failed: ${error.message}`,
-        error.stack,
-      );
+      this.logger.error(`Database connection monitor failed: ${error.message}`, error.stack)
     }
   }
 
@@ -116,36 +110,33 @@ export class ExampleExtensionService {
   private async monitorMemoryUsage(): Promise<void> {
     try {
       // 这里可以添加内存使用率监控逻辑
-      const memoryUsage = process.memoryUsage();
+      const memoryUsage = process.memoryUsage()
       const result = [
         {
           type: 'heapUsed',
           value: memoryUsage.heapUsed,
-          threshold: 100 * 1024 * 1024, // 100MB
+          threshold: 100 * 1024 * 1024 // 100MB
         },
         {
           type: 'heapTotal',
           value: memoryUsage.heapTotal,
-          threshold: 200 * 1024 * 1024, // 200MB
-        },
-      ];
+          threshold: 200 * 1024 * 1024 // 200MB
+        }
+      ]
 
       // 检查是否超过阈值
-      const exceeded = result.filter((item) => item.value > item.threshold);
+      const exceeded = result.filter((item) => item.value > item.threshold)
 
       if (this.alertService.shouldAlert(exceeded)) {
         await this.alertService.handleAlert({
           eventName: 'memory-usage-monitor',
           data: exceeded,
           timestamp: new Date().toISOString(),
-          description: `发现${exceeded.length}个内存指标异常`,
-        });
+          description: `发现${exceeded.length}个内存指标异常`
+        })
       }
     } catch (error) {
-      this.logger.error(
-        `Memory usage monitor failed: ${error.message}`,
-        error.stack,
-      );
+      this.logger.error(`Memory usage monitor failed: ${error.message}`, error.stack)
     }
   }
 }

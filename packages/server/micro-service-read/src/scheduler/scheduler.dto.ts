@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, IsOptional } from 'class-validator';
+import { IsString, IsNotEmpty, IsOptional } from 'class-validator'
 
 /**
  * 注册监控事件 DTO
@@ -6,7 +6,7 @@ import { IsString, IsNotEmpty, IsOptional } from 'class-validator';
 export class RegisterEventDto {
   @IsString()
   @IsNotEmpty({ message: '事件名称不能为空' })
-  eventName: string;
+  eventName: string
 }
 
 /**
@@ -15,7 +15,7 @@ export class RegisterEventDto {
 export class RemoveEventDto {
   @IsString()
   @IsNotEmpty({ message: '事件名称不能为空' })
-  eventName: string;
+  eventName: string
 }
 
 /**
@@ -24,7 +24,7 @@ export class RemoveEventDto {
 export class CheckEventExistsDto {
   @IsString()
   @IsNotEmpty({ message: '事件名称不能为空' })
-  eventName: string;
+  eventName: string
 }
 
 /**
@@ -33,5 +33,5 @@ export class CheckEventExistsDto {
 export class TriggerEventDto {
   @IsString()
   @IsNotEmpty({ message: '事件名称不能为空' })
-  eventName: string;
+  eventName: string
 }
