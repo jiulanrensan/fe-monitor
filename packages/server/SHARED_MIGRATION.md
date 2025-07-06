@@ -19,12 +19,17 @@ packages/server/micro-service-read/src/clickhouse/
 ### 新位置 (shared)
 
 ```
-packages/server/shared/src/clickhouse/
-├── clickhouse.service.ts      # 增强的数据库服务
-├── clickhouse.module.ts       # 全局模块
-├── clickhouse.provider.ts     # 客户端提供者
-├── clickhouse-health.service.ts # 健康检查服务
-└── index.ts                   # 导出文件
+packages/server/shared/src/
+├── clickhouse/
+│   ├── clickhouse.service.ts      # 增强的数据库服务
+│   ├── clickhouse.module.ts       # 全局模块
+│   ├── clickhouse.provider.ts     # 客户端提供者
+│   ├── clickhouse-health.service.ts # 健康检查服务
+│   └── index.ts                   # 导出文件
+├── constants/
+│   ├── monitor.ts                 # 监控事件常量定义
+│   └── index.ts                   # 常量导出文件
+└── index.ts                       # 主导出文件
 ```
 
 **注意**: shared 目录作为 monorepo 的一部分，使用根目录的依赖和配置，无需独立的 package.json 和 tsconfig.json。
@@ -72,6 +77,14 @@ export interface ClickHouseConfig {
 
 支持通过环境变量或直接配置进行自定义。
 
+### 4. 监控常量定义
+
+**新增功能：**
+
+- `MONITOR_TYPE`: 监控事件大类常量
+- `API_EVENT_TYPE`: API事件小类常量
+- TypeScript 类型定义支持
+
 ## 迁移步骤
 
 ### 1. 更新 micro-service-read
@@ -90,6 +103,8 @@ import { ClickHouseModule, ClickHouseHealthService } from '../../shared/src/clic
 **删除原有文件：**
 
 - `packages/server/micro-service-read/src/clickhouse/` 目录及其所有文件
+- `packages/server/micro-service-read/src/const/monitor.ts` 文件
+- `packages/server/micro-service-read/src/const/` 目录（如果为空）
 
 ### 2. 更新 micro-service-write
 
@@ -125,14 +140,16 @@ export class AppModule implements OnApplicationBootstrap {
 
 ```typescript
 import { ClickHouseService } from '../../shared/src/clickhouse'
+import { MONITOR_TYPE, API_EVENT_TYPE } from '../../shared/src'
 
 @Injectable()
 export class QueryService {
   constructor(private readonly clickHouseService: ClickHouseService) {}
 
   async getMonitorData() {
+    const tableName = API_EVENT_TYPE[`${MONITOR_TYPE.API}__DURATION`].toLowerCase()
     return await this.clickHouseService.query(
-      'SELECT * FROM monitor_events WHERE timestamp > now() - INTERVAL 1 HOUR'
+      `SELECT * FROM ${tableName} WHERE timestamp > now() - INTERVAL 1 HOUR`
     )
   }
 }
@@ -142,14 +159,16 @@ export class QueryService {
 
 ```typescript
 import { ClickHouseService } from '../../shared/src/clickhouse'
+import { MONITOR_TYPE, API_EVENT_TYPE, getTableName } from '../../shared/src'
 
 @Injectable()
 export class DataService {
   constructor(private readonly clickHouseService: ClickHouseService) {}
 
-  async insertMonitorData(data: any[]) {
+  async insertMonitorData(data: any[], eventType: string) {
+    const tableName = getTableName(eventType)
     return await this.clickHouseService.batchInsert(
-      'monitor_events',
+      tableName,
       data,
       1000 // 批次大小
     )

@@ -6,7 +6,7 @@ import {
   ApiErrorHttpCodeResponseDto,
   ApiErrorBusinessCodeResponseDto
 } from './dto'
-import { API_EVENT_TYPE, MONITOR_TYPE } from '../const/monitor'
+import { API_EVENT_TYPE, MONITOR_TYPE } from '../../../shared/src'
 
 const API_DURATION_TABLE = API_EVENT_TYPE[`${MONITOR_TYPE.API}__DURATION`].toLowerCase()
 

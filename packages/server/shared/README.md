@@ -10,6 +10,12 @@
 - **ClickHouseHealthService**: 提供连接健康检查和监控
 - **ClickHouseModule**: 全局模块，自动处理连接初始化
 
+### 常量定义
+
+- **监控事件常量**: 定义监控事件类型和API事件类型
+- **类型定义**: 提供 TypeScript 类型支持
+- **工具函数**: 提供表名转换等实用函数
+
 ## 安装和使用
 
 ### 1. 导入模块
@@ -79,6 +85,18 @@ export class HealthCheckService {
 }
 ```
 
+### 4. 使用监控常量
+
+```typescript
+import { MONITOR_TYPE, API_EVENT_TYPE, getTableName } from '../../shared/src'
+
+// 使用监控类型常量
+const apiType = MONITOR_TYPE.API
+
+// 使用API事件类型常量
+const durationEvent = API_EVENT_TYPE[`${MONITOR_TYPE.API}__DURATION`]
+```
+
 ## 环境变量配置
 
 确保设置以下环境变量：
@@ -123,6 +141,21 @@ CLICKHOUSE_MAX_CONNECTIONS=50
 #### getClient(): ClickHouseClient
 
 获取 ClickHouse 客户端实例
+
+### 监控常量
+
+#### MONITOR_TYPE: 监控事件大类
+
+- `API`: API类型，接口调用相关
+- `ERROR`: 错误类型，代码异常
+- `PERFORMANCE`: 性能类型，页面性能相关
+
+#### API_EVENT_TYPE: API事件小类
+
+- `API__ERROR_HTTP_CODE`: 接口调用http状态码失败
+- `API__ERROR_BUSINESS_CODE`: 接口调用业务状态码失败
+- `API__DURATION`: 接口耗时
+- `API__BODY_SIZE`: 接口req、res的body体积
 
 ### ClickHouseHealthService
 

@@ -1,5 +1,6 @@
 /**
- * 后续把这里的常量移动到公共包中
+ * 监控事件常量定义
+ * 这些常量被多个微服务共享使用
  */
 
 /**
@@ -50,4 +51,14 @@ export const API_EVENT_TYPE = {
    * 接口req、res的body体积
    */
   [`${MONITOR_TYPE.API}__BODY_SIZE`]: `${MONITOR_TYPE.API}__BODY_SIZE`
-}
+} as const
+
+/**
+ * 监控事件类型联合类型
+ */
+export type MonitorType = (typeof MONITOR_TYPE)[keyof typeof MONITOR_TYPE]
+
+/**
+ * API事件类型联合类型
+ */
+export type ApiEventType = (typeof API_EVENT_TYPE)[keyof typeof API_EVENT_TYPE]
