@@ -1,5 +1,5 @@
-import { IsString, IsOptional, IsNumber, IsNotEmpty } from 'class-validator';
-import { BaseDto } from '../../dto';
+import { IsString, IsOptional, IsNumber, IsNotEmpty } from 'class-validator'
+import { BaseDto } from '../../dto'
 
 /**
  * 时间范围 DTO
@@ -7,11 +7,11 @@ import { BaseDto } from '../../dto';
 export class TimeRangeDto {
   @IsString()
   @IsNotEmpty({ message: '开始时间不能为空' })
-  start: string;
+  start: string
 
   @IsString()
   @IsNotEmpty({ message: '结束时间不能为空' })
-  end: string;
+  end: string
 }
 
 /**
@@ -20,13 +20,13 @@ export class TimeRangeDto {
 export class APIDto extends BaseDto {
   @IsOptional()
   @IsString()
-  url?: string;
+  url?: string
 
   @IsOptional()
   @IsString()
-  method?: string;
+  method?: string
 
   @IsOptional()
   @IsNumber()
-  statusCode?: number;
+  statusCode?: number
 }

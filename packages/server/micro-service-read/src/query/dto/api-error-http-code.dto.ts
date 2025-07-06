@@ -1,13 +1,6 @@
-import {
-  IsNumber,
-  IsObject,
-  ValidateNested,
-  Min,
-  IsOptional,
-  IsString,
-} from 'class-validator';
-import { Type } from 'class-transformer';
-import { APIDto, TimeRangeDto } from './base.dto';
+import { IsNumber, IsObject, ValidateNested, Min, IsOptional, IsString } from 'class-validator'
+import { Type } from 'class-transformer'
+import { APIDto, TimeRangeDto } from './base.dto'
 
 /**
  * API 错误HTTP状态码查询 DTO
@@ -16,24 +9,24 @@ export class ApiErrorHttpCodeQueryDto extends APIDto {
   @IsObject()
   @ValidateNested()
   @Type(() => TimeRangeDto)
-  timeRange: TimeRangeDto;
+  timeRange: TimeRangeDto
 
   /**
    * APIDto已经定义了statusCode字段，这里需要重新定义
    */
   @IsNumber()
   @Min(400, { message: 'HTTP状态码必须大于等于400' })
-  declare statusCode: number;
+  declare statusCode: number
 
   /**
    * 是否使用大于等于，默认true
    */
   @IsOptional()
-  useGreaterEqual?: boolean = true;
+  useGreaterEqual?: boolean = true
 
   @IsNumber()
   @Min(1, { message: '阈值必须大于等于1' })
-  threshold: number;
+  threshold: number
 }
 
 /**
@@ -41,11 +34,11 @@ export class ApiErrorHttpCodeQueryDto extends APIDto {
  */
 export class ApiErrorHttpCodeResponseDto {
   @IsString()
-  url: string;
+  url: string
 
   @IsNumber()
-  count: number;
+  count: number
 
   @IsNumber()
-  status_code?: number;
+  status_code?: number
 }

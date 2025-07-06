@@ -1,4 +1,4 @@
-import { IsString, IsNumber, IsOptional, IsNotEmpty } from 'class-validator';
+import { IsString, IsNumber, IsOptional, IsNotEmpty } from 'class-validator'
 
 /**
  * 基本 DTO 类
@@ -6,29 +6,29 @@ import { IsString, IsNumber, IsOptional, IsNotEmpty } from 'class-validator';
 export class BaseDto {
   @IsString()
   @IsNotEmpty({ message: '应用ID不能为空' })
-  aid: string;
+  aid: string
 
   @IsOptional()
   @IsString()
-  sid?: string;
+  sid?: string
 
   @IsOptional()
   @IsString()
-  uid?: string;
+  uid?: string
 
   @IsOptional()
   @IsString()
-  logTime?: string;
+  logTime?: string
 
   @IsOptional()
   @IsString()
-  reportTime?: string;
+  reportTime?: string
 
   @IsOptional()
   @IsNumber()
-  retryTimes?: number;
+  retryTimes?: number
 
   @IsOptional()
   @IsString()
-  model?: string;
+  model?: string
 }
