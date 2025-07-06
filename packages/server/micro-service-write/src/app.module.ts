@@ -3,9 +3,10 @@ import { AppController } from './app.controller'
 import { AppService } from './app.service'
 import { DataService } from './data.service'
 import { ClickHouseModule, ClickHouseHealthService } from '../../shared/src'
+import { ReportModule } from './report/report.module'
 
 @Module({
-  imports: [ClickHouseModule],
+  imports: [ClickHouseModule, ReportModule],
   controllers: [AppController],
   providers: [AppService, DataService]
 })
