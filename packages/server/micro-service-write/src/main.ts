@@ -1,25 +1,25 @@
-import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
-import { Logger } from '@nestjs/common';
-import * as dotenv from 'dotenv';
+import { NestFactory } from '@nestjs/core'
+import { AppModule } from './app.module'
+import { Logger } from '@nestjs/common'
+import * as dotenv from 'dotenv'
 
 // 加载环境变量
-dotenv.config({ path: '../.env' });
+dotenv.config({ path: '../.env' })
 
 async function bootstrap() {
-  const logger = new Logger('Bootstrap');
-  logger.log('Starting write service...');
+  const logger = new Logger('Bootstrap')
+  logger.log('Starting write service...')
   logger.log('Environment variables loaded:', {
     CLICKHOUSE_HOST: process.env.CLICKHOUSE_HOST,
     CLICKHOUSE_PORT: process.env.CLICKHOUSE_PORT,
     CLICKHOUSE_USER: process.env.CLICKHOUSE_USER,
     CLICKHOUSE_PASSWORD: process.env.CLICKHOUSE_PASSWORD,
-    CLICKHOUSE_DB: process.env.CLICKHOUSE_DB,
-  });
-  const app = await NestFactory.create(AppModule);
+    CLICKHOUSE_DB: process.env.CLICKHOUSE_DB
+  })
+  const app = await NestFactory.create(AppModule)
 
-  const port = process.env.PORT ?? 3000;
-  await app.listen(port);
-  logger.log(`Write service running on: http://127.0.0.1:${port}`);
+  const port = process.env.WRITE_SERVICE_PORT ?? 3001
+  await app.listen(port)
+  logger.log(`Write service running on: http://127.0.0.1:${port}`)
 }
-bootstrap();
+bootstrap()

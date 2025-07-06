@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common'
-import { ClickHouseService } from '../clickhouse/clickhouse.service'
+import { ClickHouseService } from '../../../shared/src'
 import {
   ApiDurationResponseDto,
   ApiBodySizeResponseDto,
@@ -102,9 +102,9 @@ export class QueryService {
     const whereClause = conditions.join(' AND ')
     const query = `
       SELECT url, count() AS count,
-      quantile(0.50)(duration) AS median_duration,
-      quantile(0.95)(duration) AS p95_duration,
-      quantile(0.99)(duration) AS p99_duration
+      quantileTDigest(0.50)(duration) AS median_duration,
+      quantileTDigest(0.95)(duration) AS p95_duration,
+      quantileTDigest(0.99)(duration) AS p99_duration
       FROM ${API_DURATION_TABLE} WHERE ${whereClause} GROUP BY url HAVING count >= ${threshold}`
 
     this.logger.log(`Executing count query: ${query}`)
@@ -134,8 +134,8 @@ export class QueryService {
 
     const whereClause = conditions.join(' AND ')
     const query = `SELECT url, count() AS count,
-    quantile(0.50)(req_body_size) AS median_req_body_size,
-    quantile(0.50)(res_body_size) AS median_res_body_size
+    quantileTDigest(0.50)(req_body_size) AS median_req_body_size,
+    quantileTDigest(0.50)(res_body_size) AS median_res_body_size
     FROM ${API_BODY_SIZE_TABLE} WHERE ${whereClause} GROUP BY url HAVING count >= ${threshold}`
 
     this.logger.log(`Executing body size count query: ${query}`)

@@ -1,32 +1,29 @@
-import { Logger, Module, OnApplicationBootstrap } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-import { ClickHouseModule } from './clickhouse/clickhouse.module';
-import { ClickHouseHealthService } from './clickhouse/clickhouse-health.service';
-import { QueryModule } from './query/query.module';
-import { SchedulerModule } from './scheduler/scheduler.module';
+import { Logger, Module, OnApplicationBootstrap } from '@nestjs/common'
+import { AppController } from './app.controller'
+import { AppService } from './app.service'
+import { ClickHouseModule, ClickHouseHealthService } from '../../shared/src'
+import { QueryModule } from './query/query.module'
+import { SchedulerModule } from './scheduler/scheduler.module'
 
 @Module({
   imports: [ClickHouseModule, QueryModule, SchedulerModule],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService]
 })
 export class AppModule implements OnApplicationBootstrap {
-  private readonly logger = new Logger(AppModule.name);
+  private readonly logger = new Logger(AppModule.name)
 
   constructor(private readonly healthService: ClickHouseHealthService) {}
 
   async onApplicationBootstrap() {
     // 双重检查确保连接正常
-    const isConnected = await this.healthService.checkConnection();
+    const isConnected = await this.healthService.checkConnection()
 
     if (!isConnected) {
-      this.logger.fatal(
-        'Fatal: ClickHouse connection verification failed. Application exiting.',
-      );
-      process.exit(1);
+      this.logger.fatal('Fatal: ClickHouse connection verification failed. Application exiting.')
+      process.exit(1)
     }
 
-    this.logger.log('Application successfully connected to ClickHouse');
+    this.logger.log('Application successfully connected to ClickHouse')
   }
 }
