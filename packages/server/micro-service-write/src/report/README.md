@@ -1,8 +1,12 @@
-# 自动化 DTO 映射系统
+# 自动化 DTO 映射系统 + 缓存队列系统
 
 ## 概述
 
-这个系统直接从 DTO 类的定义中自动获取所有字段（包括继承的字段），无需手动声明字段列表，实现真正的自动化字段提取。核心逻辑已抽离到 `shared` 包中，便于复用。
+这个系统包含两个核心功能：
+
+1. **自动化 DTO 映射系统**: 直接从 DTO 类的定义中自动获取所有字段（包括继承的字段），无需手动声明字段列表，实现真正的自动化字段提取。核心逻辑已抽离到 `shared` 包中，便于复用。
+
+2. **缓存队列系统**: 为减少与数据库的IO操作，系统实现了缓存队列机制，为每个数据表维护独立的队列，当满足条件时自动批量插入数据。
 
 ## 架构设计
 
@@ -38,7 +42,45 @@
 - 处理错误和日志记录
 - 业务逻辑控制
 
-### 3. 直接从类定义获取字段
+### 3. 缓存队列系统
+
+#### 核心组件
+
+- **QueueCacheService**: 缓存队列服务，管理所有表的队列
+- **QueueCacheController**: 队列监控和管理接口
+- **queue.config.ts**: 队列配置文件，定义不同表的默认配置
+
+#### 触发条件
+
+队列会在以下两个条件之一满足时触发批量插入：
+
+1. **队列长度达到阈值**: 当队列中的数据量达到配置的 `maxSize` 时
+2. **时间间隔到达**: 当距离上次插入的时间达到配置的 `flushInterval` 时（使用 setTimeout 避免重叠执行）
+
+#### 配置参数
+
+```typescript
+interface QueueConfig {
+  maxSize: number // 队列最大长度
+  flushInterval: number // 刷新间隔（毫秒）
+  retryAttempts?: number // 重试次数
+  retryDelay?: number // 重试延迟（毫秒）
+}
+```
+
+#### 表特定配置
+
+- **performance_metrics**: 高频数据，3秒刷新，50条批量
+- **error_logs**: 重要数据，2秒刷新，20条批量，5次重试
+- **API相关表**: 中等频率，4秒刷新，60-80条批量
+
+#### 定时器机制
+
+- 使用 `setTimeout` 而不是 `setInterval`，避免定时器重叠执行
+- 每次执行完成后重新启动定时器，确保间隔准确
+- 定时器触发时，如果队列长度小于阈值的一半，则跳过刷新（避免频繁的小批量插入）
+
+### 4. 直接从类定义获取字段
 
 系统会自动分析 DTO 类的继承链，获取所有字段：
 
@@ -61,29 +103,42 @@ export class ApiDurationReportDto extends APIDto {
 - `APIDto` 的字段：`url`, `method`, `statusCode`
 - `ApiDurationReportDto` 的字段：`duration`, `queueTime`, `queueStart`, `queueEnd`, `reqPage`, `resPage`, `network`
 
-### 4. 服务方法实现
+### 5. 服务方法实现
 
-`reportApiDuration()` 方法现在分离了职责：
+`reportApiDuration()` 方法现在使用缓存队列系统：
 
 ```typescript
 async reportApiDuration(data: any): Promise<void> {
   this.logger.log(`reportApiDuration: ${JSON.stringify(data)}`)
 
-  try {
-    // 调用 shared 包方法获取提取的数据
-    const { extractedData, tableName } = extractDataFromDto(data, ApiDurationReportDto)
+  // 使用缓存队列系统，数据会自动推入队列
+  return this.report(data, ApiDurationReportDto)
+}
 
-    if (!tableName) {
-      throw new Error(`No table mapping found for ApiDurationReportDto`)
+// 通用的报告方法现在使用队列
+private async report<T extends Record<string, any>>(
+  data: any,
+  dtoClass: new (...args: any[]) => T,
+  tableName?: string,
+  methodName?: string
+): Promise<void> {
+  const className = dtoClass.name
+  const logMethodName = methodName || className
+
+  try {
+    const { extractedData, tableName: decoratorTableName } = extractDataFromDto(data, dtoClass)
+    const targetTable = tableName || decoratorTableName
+
+    if (!targetTable) {
+      throw new Error(`No table mapping found for ${className}`)
     }
 
-    // 服务层负责数据库操作
-    const mappedData = [extractedData]
-    const res = await this.clickHouseService.insert(tableName, mappedData)
+    // 将数据推入缓存队列，而不是直接插入数据库
+    await this.queueCacheService.push(targetTable, extractedData)
 
-    this.logger.log(`Report ApiDurationReportDto success: ${JSON.stringify(res?.summary)}`)
+    this.logger.log(`Data queued for ${className} to table ${targetTable}`)
   } catch (error) {
-    this.logger.error(`Failed to report ApiDurationReportDto data: ${error.message}`, error.stack)
+    this.logger.error(`Failed to queue ${logMethodName} data: ${error.message}`, error.stack)
     throw error
   }
 }
@@ -197,6 +252,63 @@ await this.reportService.reportApiBodySize({
 7. **易于维护**：字段变化时自动适应，无需修改服务代码
 8. **灵活输入**：接受任何包含所需字段的对象
 9. **调试友好**：详细的日志输出帮助诊断问题
+
+## 缓存队列系统 API 接口
+
+### 获取队列状态
+
+```http
+GET /queue-cache/status
+```
+
+返回所有队列的当前状态和配置信息。
+
+### 手动刷新所有队列
+
+```http
+POST /queue-cache/flush
+```
+
+立即刷新所有队列中的数据到数据库。
+
+### 手动刷新指定表的队列
+
+```http
+POST /queue-cache/flush/{tableName}
+```
+
+立即刷新指定表队列中的数据到数据库。
+
+### 配置表队列参数
+
+```http
+PUT /queue-cache/configure/{tableName}
+Content-Type: application/json
+
+{
+  "maxSize": 50,
+  "flushInterval": 3000,
+  "retryAttempts": 2
+}
+```
+
+动态配置指定表的队列参数。
+
+## 错误处理
+
+- 插入失败时会自动重试，重试次数可配置
+- 重试失败后数据会重新放回队列
+- 所有错误都会记录到日志中
+
+## 资源清理
+
+服务实现了 `OnModuleDestroy` 接口，在模块销毁时会：
+
+1. 刷新所有队列中的数据
+2. 清除所有定时器
+3. 清理内存资源
+
+确保数据不会丢失。
 
 ## 调试信息
 

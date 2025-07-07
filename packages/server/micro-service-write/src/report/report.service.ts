@@ -10,12 +10,16 @@ import {
   ApiBodySizeReportDto
 } from './dto'
 import { extractDataFromDto } from 'shared/src'
+import { QueueCacheService } from './queue-cache.service'
 
 @Injectable()
 export class ReportService {
   private readonly logger = new Logger(ReportService.name)
 
-  constructor(private readonly clickHouseService: ClickHouseService) {}
+  constructor(
+    private readonly clickHouseService: ClickHouseService,
+    private readonly queueCacheService: QueueCacheService
+  ) {}
 
   /**
    * 通用的报告方法
@@ -41,12 +45,11 @@ export class ReportService {
         throw new Error(`No table mapping found for ${className}`)
       }
 
-      const mappedData = [extractedData]
-      const res = await this.clickHouseService.insert(targetTable, mappedData)
-
-      this.logger.log(`Report ${className} success: ${JSON.stringify(res?.summary)}`)
+      // 将数据推入缓存队列，而不是直接插入数据库
+      //   异步操作，不阻塞主线程
+      this.queueCacheService.push(targetTable, extractedData)
     } catch (error) {
-      this.logger.error(`Failed to report ${logMethodName} data: ${error.message}`, error.stack)
+      this.logger.error(`Failed to queue ${logMethodName} data: ${error.message}`, error.stack)
       throw error
     }
   }
@@ -55,7 +58,7 @@ export class ReportService {
    * 上报API耗时数据
    */
   async reportApiDuration(data: any): Promise<void> {
-    this.logger.log(`reportApiDuration: ${JSON.stringify(data)}`)
+    // this.logger.log(`reportApiDuration: ${JSON.stringify(data)}`)
     return this.report(data, ApiDurationReportDto)
   }
 

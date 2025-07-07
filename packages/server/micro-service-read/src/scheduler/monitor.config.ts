@@ -36,6 +36,9 @@ export interface MonitorConfig {
   }
 }
 
+/**
+ * todo 抽离到配置文件中
+ */
 export const defaultMonitorConfig: MonitorConfig = {
   defaultAid: 'app_001',
   defaultThreshold: 2,
