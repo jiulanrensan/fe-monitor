@@ -26,7 +26,7 @@ export class ClickHouseService {
 
   async insert(table: string, data: any[]): Promise<InsertResult | null> {
     try {
-      return this.client.insert({
+      return await this.client.insert({
         table,
         values: data,
         format: 'JSONEachRow'

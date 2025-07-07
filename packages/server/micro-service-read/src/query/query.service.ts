@@ -6,17 +6,12 @@ import {
   ApiErrorHttpCodeResponseDto,
   ApiErrorBusinessCodeResponseDto
 } from './dto'
-import { API_EVENT_TYPE, MONITOR_TYPE } from '../../../shared/src'
-
-const API_DURATION_TABLE = API_EVENT_TYPE[`${MONITOR_TYPE.API}__DURATION`].toLowerCase()
-
-const API_BODY_SIZE_TABLE = API_EVENT_TYPE[`${MONITOR_TYPE.API}__BODY_SIZE`].toLowerCase()
-
-const API_ERROR_HTTP_CODE_TABLE =
-  API_EVENT_TYPE[`${MONITOR_TYPE.API}__ERROR_HTTP_CODE`].toLowerCase()
-
-const API_ERROR_BUSINESS_CODE_TABLE =
-  API_EVENT_TYPE[`${MONITOR_TYPE.API}__ERROR_BUSINESS_CODE`].toLowerCase()
+import {
+  API_DURATION_TABLE,
+  API_BODY_SIZE_TABLE,
+  API_ERROR_HTTP_CODE_TABLE,
+  API_ERROR_BUSINESS_CODE_TABLE
+} from '../../../shared/src'
 
 @Injectable()
 export class QueryService {

@@ -9,24 +9,18 @@ import {
   ApiErrorHttpCodeReportDto,
   ApiBodySizeReportDto
 } from './dto'
+import {
+  API_DURATION_TABLE,
+  API_BODY_SIZE_TABLE,
+  API_ERROR_HTTP_CODE_TABLE,
+  API_ERROR_BUSINESS_CODE_TABLE
+} from '../../../shared/src'
 
 @Injectable()
 export class ReportService {
   private readonly logger = new Logger(ReportService.name)
 
   constructor(private readonly clickHouseService: ClickHouseService) {}
-
-  /**
-   * 上报API监控数据
-   */
-  async reportApi(data: APIDto): Promise<void> {
-    try {
-      this.logger.log(`Reporting API data for app: ${data.aid}`)
-    } catch (error) {
-      this.logger.error(`Failed to report API data: ${error.message}`, error.stack)
-      throw error
-    }
-  }
 
   /**
    * 上报API耗时数据
@@ -49,8 +43,7 @@ export class ReportService {
         }
       ]
 
-      await this.clickHouseService.insert('api_duration_metrics', durationData)
-      this.logger.log(`API duration data reported successfully for app: ${data.aid}`)
+      await this.clickHouseService.insert(API_DURATION_TABLE, durationData)
     } catch (error) {
       this.logger.error(`Failed to report API duration data: ${error.message}`, error.stack)
       throw error
@@ -62,8 +55,6 @@ export class ReportService {
    */
   async reportApiErrorBusinessCode(data: ApiErrorBusinessCodeReportDto): Promise<void> {
     try {
-      this.logger.log(`Reporting API business error data for app: ${data.aid}`)
-
       const errorData = [
         {
           aid: data.aid,
@@ -75,8 +66,7 @@ export class ReportService {
         }
       ]
 
-      await this.clickHouseService.insert('api_business_errors', errorData)
-      this.logger.log(`API business error data reported successfully for app: ${data.aid}`)
+      await this.clickHouseService.insert(API_ERROR_BUSINESS_CODE_TABLE, errorData)
     } catch (error) {
       this.logger.error(`Failed to report API business error data: ${error.message}`, error.stack)
       throw error
@@ -88,8 +78,6 @@ export class ReportService {
    */
   async reportApiErrorHttpCode(data: ApiErrorHttpCodeReportDto): Promise<void> {
     try {
-      this.logger.log(`Reporting API HTTP error data for app: ${data.aid}`)
-
       const errorData = [
         {
           aid: data.aid,
@@ -100,8 +88,7 @@ export class ReportService {
         }
       ]
 
-      await this.clickHouseService.insert('api_http_errors', errorData)
-      this.logger.log(`API HTTP error data reported successfully for app: ${data.aid}`)
+      await this.clickHouseService.insert(API_ERROR_HTTP_CODE_TABLE, errorData)
     } catch (error) {
       this.logger.error(`Failed to report API HTTP error data: ${error.message}`, error.stack)
       throw error
@@ -113,8 +100,6 @@ export class ReportService {
    */
   async reportApiBodySize(data: ApiBodySizeReportDto): Promise<void> {
     try {
-      this.logger.log(`Reporting API body size data for app: ${data.aid}`)
-
       const bodySizeData = [
         {
           aid: data.aid,
@@ -126,8 +111,7 @@ export class ReportService {
         }
       ]
 
-      await this.clickHouseService.insert('api_body_size_metrics', bodySizeData)
-      this.logger.log(`API body size data reported successfully for app: ${data.aid}`)
+      await this.clickHouseService.insert(API_BODY_SIZE_TABLE, bodySizeData)
     } catch (error) {
       this.logger.error(`Failed to report API body size data: ${error.message}`, error.stack)
       throw error
@@ -139,8 +123,6 @@ export class ReportService {
    */
   async reportPerformance(data: PerformanceDto): Promise<void> {
     try {
-      this.logger.log(`Reporting performance data for app: ${data.aid}`)
-
       const performanceData = [
         {
           aid: data.aid,
@@ -150,7 +132,6 @@ export class ReportService {
       ]
 
       //   await this.clickHouseService.insert('performance_metrics', performanceData)
-      this.logger.log(`Performance data reported successfully for app: ${data.aid}`)
     } catch (error) {
       this.logger.error(`Failed to report performance data: ${error.message}`, error.stack)
       throw error
@@ -162,8 +143,6 @@ export class ReportService {
    */
   async reportError(data: ErrorDto): Promise<void> {
     try {
-      this.logger.log(`Reporting error data for app: ${data.aid}`)
-
       const errorData = [
         {
           aid: data.aid,
@@ -174,7 +153,6 @@ export class ReportService {
       ]
 
       await this.clickHouseService.insert('error_logs', errorData)
-      this.logger.log(`Error data reported successfully for app: ${data.aid}`)
     } catch (error) {
       this.logger.error(`Failed to report error data: ${error.message}`, error.stack)
       throw error
