@@ -258,3 +258,56 @@ SHOW TABLES FROM your_database;
 ```shell
 DESCRIBE TABLE my_table;
 ```
+
+# 踩坑记录
+
+## insert报错
+
+```shell
+ClickHouse insert failed: (total) memory limit exceeded: would use 14.11 GiB (attempt to allocate chunk of 4.36 MiB bytes), current RSS: 3.08 GiB, maximum: 13.91 GiB. OvercommitTracker decision: Query was selected to stop by OvercommitTracker.
+Error: (total) memory limit exceeded: would use 14.11 GiB (attempt to allocate chunk of 4.36 MiB bytes), current RSS: 3.08 GiB, maximum: 13.91 GiB. OvercommitTracker decision: Query was selected to stop by OvercommitTracker
+```
+
+```shell
+# 检查服务器级内存使用
+SELECT
+    metric,
+    formatReadableSize(value) AS size
+FROM system.asynchronous_metrics
+WHERE metric LIKE '%Memory%'
+AND metric IN (
+    'MemoryResident',
+    'MemoryShared',
+    'MemoryCode',
+    'MemoryDataAndStack'
+);
+```
+
+```shell
+# 输出结果
+
+   ┌─metric─────────────┬─size───────┐
+1. │ MemoryDataAndStack │ 170.67 GiB │
+2. │ MemoryShared       │ 412.66 MiB │
+3. │ MemoryCode         │ 330.82 MiB │
+4. │ MemoryResident     │ 2.94 GiB   │
+   └────────────────────┴────────────┘
+```
+
+1. 核心问题：
+
+MemoryDataAndStack 显示 170.67 GiB (虚拟内存)
+
+MemoryResident 显示 2.94 GiB (实际物理内存)
+
+但服务器最大内存限制是 13.91 GiB (≈14938284441 bytes)
+
+2. 根本原因：
+
+虚拟内存地址空间耗尽而非物理内存耗尽。ClickHouse在64位系统中通常有128TB地址空间，但您的环境显示：
+
+已分配虚拟地址空间：170.67 GiB
+
+剩余可用虚拟地址空间不足，导致无法分配新内存块
+
+总之，重启数据库服务就可以了
