@@ -1,5 +1,5 @@
-import { IsString, IsNumber, IsOptional, IsNotEmpty, IsEnum } from 'class-validator'
-import { MONITOR_TYPE } from 'shared/src'
+import { IsString, IsNumber, IsOptional, IsNotEmpty, IsEnum, isEnum } from 'class-validator'
+import { API_SUB_TYPE, MONITOR_TYPE } from 'shared/src'
 
 /**
  * 基本 DTO 类
@@ -29,4 +29,7 @@ export class BaseDto {
 
   @IsEnum(MONITOR_TYPE, { message: '类型错误' })
   type: MONITOR_TYPE
+
+  @IsEnum(API_SUB_TYPE, { message: '类型错误' })
+  subType: API_SUB_TYPE
 }

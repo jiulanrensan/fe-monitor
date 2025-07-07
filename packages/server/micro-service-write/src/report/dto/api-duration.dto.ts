@@ -1,6 +1,6 @@
-import { IsNumber, IsOptional, IsString } from 'class-validator'
-
+import { IsNumber, IsOptional, IsString, IsEnum } from 'class-validator'
 import { APIDto } from './base.dto'
+import { API_SUB_TYPE } from '../../../../shared/src'
 
 /**
  * API 耗时上报 DTO
@@ -11,19 +11,21 @@ export class ApiDurationReportDto extends APIDto {
 
   @IsOptional()
   @IsNumber()
-  queueTime: number
+  queueTime?: number
 
+  @IsOptional()
   @IsNumber()
-  queue_start: number
+  queueStart?: number
 
+  @IsOptional()
   @IsNumber()
-  queue_end: number
+  queueEnd?: number
 
   @IsString()
-  req_page: string
+  reqPage: string
 
   @IsString()
-  res_page: string
+  resPage: string
 
   @IsString()
   network: string

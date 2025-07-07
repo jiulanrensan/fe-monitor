@@ -27,7 +27,7 @@ async function bootstrap() {
       /**
        * false: 保留所有字段，包括未定义的
        */
-      whitelist: true,
+      whitelist: false,
       /**
        * false: 不禁止未定义的字段,不会抛出错误
        */

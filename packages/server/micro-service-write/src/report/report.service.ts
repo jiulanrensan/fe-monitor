@@ -1,6 +1,14 @@
 import { Injectable, Logger } from '@nestjs/common'
 import { ClickHouseService } from '../../../shared/src'
-import { PerformanceDto, ErrorDto, APIDto } from './dto'
+import {
+  PerformanceDto,
+  ErrorDto,
+  APIDto,
+  ApiDurationReportDto,
+  ApiErrorBusinessCodeReportDto,
+  ApiErrorHttpCodeReportDto,
+  ApiBodySizeReportDto
+} from './dto'
 
 @Injectable()
 export class ReportService {
@@ -16,6 +24,112 @@ export class ReportService {
       this.logger.log(`Reporting API data for app: ${data.aid}`)
     } catch (error) {
       this.logger.error(`Failed to report API data: ${error.message}`, error.stack)
+      throw error
+    }
+  }
+
+  /**
+   * 上报API耗时数据
+   */
+  async reportApiDuration(data: ApiDurationReportDto): Promise<void> {
+    try {
+      const durationData = [
+        {
+          aid: data.aid,
+          url: data.url,
+          method: data.method,
+          status_code: data.statusCode,
+          duration: data.duration,
+          queue_time: data.queueTime || 0,
+          queue_start: data.queueStart || 0,
+          queue_end: data.queueEnd || 0,
+          req_page: data.reqPage,
+          res_page: data.resPage,
+          network: data.network
+        }
+      ]
+
+      await this.clickHouseService.insert('api_duration_metrics', durationData)
+      this.logger.log(`API duration data reported successfully for app: ${data.aid}`)
+    } catch (error) {
+      this.logger.error(`Failed to report API duration data: ${error.message}`, error.stack)
+      throw error
+    }
+  }
+
+  /**
+   * 上报API业务错误数据
+   */
+  async reportApiErrorBusinessCode(data: ApiErrorBusinessCodeReportDto): Promise<void> {
+    try {
+      this.logger.log(`Reporting API business error data for app: ${data.aid}`)
+
+      const errorData = [
+        {
+          aid: data.aid,
+          url: data.url,
+          method: data.method,
+          status_code: data.statusCode,
+          error_code: data.errorCode,
+          error_reason: data.errorReason
+        }
+      ]
+
+      await this.clickHouseService.insert('api_business_errors', errorData)
+      this.logger.log(`API business error data reported successfully for app: ${data.aid}`)
+    } catch (error) {
+      this.logger.error(`Failed to report API business error data: ${error.message}`, error.stack)
+      throw error
+    }
+  }
+
+  /**
+   * 上报API HTTP错误数据
+   */
+  async reportApiErrorHttpCode(data: ApiErrorHttpCodeReportDto): Promise<void> {
+    try {
+      this.logger.log(`Reporting API HTTP error data for app: ${data.aid}`)
+
+      const errorData = [
+        {
+          aid: data.aid,
+          url: data.url,
+          method: data.method,
+          status_code: data.statusCode,
+          error_reason: data.error_reason
+        }
+      ]
+
+      await this.clickHouseService.insert('api_http_errors', errorData)
+      this.logger.log(`API HTTP error data reported successfully for app: ${data.aid}`)
+    } catch (error) {
+      this.logger.error(`Failed to report API HTTP error data: ${error.message}`, error.stack)
+      throw error
+    }
+  }
+
+  /**
+   * 上报API Body大小数据
+   */
+  async reportApiBodySize(data: ApiBodySizeReportDto): Promise<void> {
+    try {
+      this.logger.log(`Reporting API body size data for app: ${data.aid}`)
+
+      const bodySizeData = [
+        {
+          aid: data.aid,
+          url: data.url,
+          method: data.method,
+          status_code: data.statusCode,
+          req_body_size: data.reqBodySize,
+          res_body_size: data.resBodySize
+        }
+      ]
+
+      await this.clickHouseService.insert('api_body_size_metrics', bodySizeData)
+      this.logger.log(`API body size data reported successfully for app: ${data.aid}`)
+    } catch (error) {
+      this.logger.error(`Failed to report API body size data: ${error.message}`, error.stack)
       throw error
     }
   }
