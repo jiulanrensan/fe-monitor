@@ -7,20 +7,20 @@
  * 监控事件大类，后续可以扩展
  * 目前只开发了API类型
  */
-export const MONITOR_TYPE = {
+export enum MONITOR_TYPE {
   /**
    * API类型: 接口调用相关(包含接口异常、接口耗时)
    */
-  API: 'API',
+  API = 'API',
   /**
    * 错误类型，代码异常
    */
-  ERROR: 'ERROR',
+  ERROR = 'ERROR',
   /**
    * 性能类型: 页面性能相关(包含页面加载、页面渲染、页面交互)
    */
-  PERFORMANCE: 'PERFORMANCE'
-} as const
+  PERFORMANCE = 'PERFORMANCE'
+}
 
 /**
  * API类型事件小类
@@ -52,11 +52,6 @@ export const API_EVENT_TYPE = {
    */
   [`${MONITOR_TYPE.API}__BODY_SIZE`]: `${MONITOR_TYPE.API}__BODY_SIZE`
 } as const
-
-/**
- * 监控事件类型联合类型
- */
-export type MonitorType = (typeof MONITOR_TYPE)[keyof typeof MONITOR_TYPE]
 
 /**
  * API事件类型联合类型

@@ -1,10 +1,10 @@
 import { NestFactory } from '@nestjs/core'
 import { AppModule } from './app.module'
-import { Logger } from '@nestjs/common'
+import { Logger, ValidationPipe } from '@nestjs/common'
 import * as dotenv from 'dotenv'
 
 // 加载环境变量
-dotenv.config({ path: '../.env' })
+dotenv.config({ path: '.env' })
 
 async function bootstrap() {
   const logger = new Logger('Bootstrap')
@@ -17,7 +17,24 @@ async function bootstrap() {
     CLICKHOUSE_DB: process.env.CLICKHOUSE_DB
   })
   const app = await NestFactory.create(AppModule)
-
+  // 添加全局校验管道
+  app.useGlobalPipes(
+    new ValidationPipe({
+      /**
+       * true: 自动转换类型（如字符串转数字）
+       */
+      transform: true,
+      /**
+       * false: 保留所有字段，包括未定义的
+       */
+      whitelist: true,
+      /**
+       * false: 不禁止未定义的字段,不会抛出错误
+       */
+      forbidNonWhitelisted: false,
+      errorHttpStatusCode: 400
+    })
+  )
   const port = process.env.WRITE_SERVICE_PORT ?? 3001
   await app.listen(port)
   logger.log(`Write service running on: http://127.0.0.1:${port}`)

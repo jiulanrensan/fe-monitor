@@ -1,4 +1,5 @@
-import { IsString, IsNumber, IsOptional, IsNotEmpty } from 'class-validator'
+import { IsString, IsNumber, IsOptional, IsNotEmpty, IsEnum } from 'class-validator'
+import { MONITOR_TYPE } from 'shared/src'
 
 /**
  * 基本 DTO 类
@@ -8,27 +9,24 @@ export class BaseDto {
   @IsNotEmpty({ message: '应用ID不能为空' })
   aid: string
 
-  @IsOptional()
-  @IsString()
-  sid?: string
+  @IsString({ message: '' })
+  sid: string
 
-  @IsOptional()
-  @IsString()
-  uid?: string
+  @IsString({ message: '' })
+  uid: string
 
-  @IsOptional()
-  @IsString()
-  logTime?: string
+  @IsString({ message: '' })
+  logTime: string
 
-  @IsOptional()
-  @IsString()
-  reportTime?: string
+  @IsString({ message: '' })
+  reportTime: string
 
-  @IsOptional()
-  @IsNumber()
-  retryTimes?: number
+  @IsNumber({}, { message: '' })
+  retryTimes: number
 
-  @IsOptional()
-  @IsString()
-  model?: string
+  @IsString({ message: '' })
+  model: string
+
+  @IsEnum(MONITOR_TYPE, { message: '类型错误' })
+  type: MONITOR_TYPE
 }

@@ -5,17 +5,14 @@ import { BaseDto } from '../../dto'
  * API 相关字段 DTO
  */
 export class APIDto extends BaseDto {
-  @IsOptional()
   @IsString()
-  url?: string
+  url: string
 
-  @IsOptional()
   @IsString()
-  method?: string
+  method: string
 
-  @IsOptional()
   @IsNumber()
-  statusCode?: number
+  statusCode: number
 }
 
 /**
