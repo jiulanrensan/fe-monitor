@@ -30,6 +30,12 @@ export class ReportService {
       const durationData = [
         {
           aid: data.aid,
+          sid: data.sid,
+          uid: data.uid,
+          log_time: data.logTime,
+          report_time: data.reportTime,
+          retry_times: data.retryTimes,
+          model: data.model,
           url: data.url,
           method: data.method,
           status_code: data.statusCode,
@@ -42,8 +48,8 @@ export class ReportService {
           network: data.network
         }
       ]
-
-      await this.clickHouseService.insert(API_DURATION_TABLE, durationData)
+      const res = await this.clickHouseService.insert(API_DURATION_TABLE, durationData)
+      this.logger.log(`insert success: ${JSON.stringify(res?.summary)}`)
     } catch (error) {
       this.logger.error(`Failed to report API duration data: ${error.message}`, error.stack)
       throw error

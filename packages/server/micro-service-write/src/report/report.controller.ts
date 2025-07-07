@@ -161,6 +161,7 @@ export class ReportController {
   @Post()
   async report(@Body() data: BaseDto) {
     try {
+      //   this.logger.log(`report: ${JSON.stringify(data)}`)
       const strategy = this.strategies.get(data.type)
 
       if (!strategy) {
@@ -172,7 +173,6 @@ export class ReportController {
       if (!(await strategy.validate(data))) {
         return SUCCESS_RESPONSE
       }
-
       // 执行处理
       await strategy.handle(data)
 

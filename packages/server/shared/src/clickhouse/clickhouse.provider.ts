@@ -21,7 +21,7 @@ export const createClickHouseClient = (config?: Partial<ClickHouseConfig>): Prov
       username: process.env.CLICKHOUSE_USER || 'default',
       password: process.env.CLICKHOUSE_PASSWORD || '',
       database: process.env.CLICKHOUSE_DB || 'default',
-      maxOpenConnections: parseInt(process.env.CLICKHOUSE_MAX_CONNECTIONS || '50')
+      maxOpenConnections: parseInt(process.env.CLICKHOUSE_MAX_CONNECTIONS || '10')
     }
 
     const finalConfig = { ...defaultConfig, ...config }
