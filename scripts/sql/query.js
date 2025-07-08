@@ -1,16 +1,14 @@
-/* eslint-disable */
-const http = require('http');
+ 
+import http from 'http';
+import constant from './constant.js';
 
-const hostname = 'localhost';
-const port = 8123;
-const username = 'fre_monitor_user';
-const password = 'Password123!';
+const { hostname, port, username, password, database, table } = constant;
 
 // 对密码进行encodeURIComponent编码
 const encodedPassword = encodeURIComponent(password);
 
 // 要查询的SQL语句
-const querySQL = 'SELECT * FROM fre_monitor_db.api__duration FORMAT JSON';
+const querySQL = `SELECT * FROM ${database}.${table} FORMAT JSON`;
 
 // 正确的URL构建方式 - SQL查询应该作为query参数
 const path = `/query?user=${username}&password=${encodedPassword}&query=${encodeURIComponent(querySQL)}`;
