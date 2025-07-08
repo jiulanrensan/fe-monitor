@@ -50,7 +50,7 @@ CREATE TABLE fre_monitor_db.api__duration
     res_page LowCardinality(String) COMMENT '获取到响应时的页面路径',
     network LowCardinality(String) COMMENT '请求时的网络状态',
     model LowCardinality(String) COMMENT '机型',
-    create_time DateTime DEFAULT now() COMMENT '插入表时间，INSERT时通过now()创建',
+    create_time DateTime DEFAULT now('Asia/Shanghai') COMMENT '插入表时间，INSERT时通过now()创建',
 
     INDEX duration_idx duration TYPE minmax GRANULARITY 3,
     INDEX url_idx url TYPE tokenbf_v1(65536, 4, 0) GRANULARITY 3,
@@ -81,7 +81,7 @@ CREATE TABLE fre_monitor_db.api__body_size
     req_body_size UInt16 COMMENT '请求body大小，单位kb',
     res_body_size UInt16 COMMENT '响应body大小，单位kb',
     model LowCardinality(String) COMMENT '机型',
-    create_time DateTime DEFAULT now() COMMENT '插入表时间，INSERT时通过now()创建',
+    create_time DateTime DEFAULT now('Asia/Shanghai') COMMENT '插入表时间，INSERT时通过now()创建',
 
     INDEX url_idx url TYPE tokenbf_v1(65536, 4, 0) GRANULARITY 3,
     INDEX status_code_idx status_code TYPE minmax GRANULARITY 2
@@ -110,7 +110,7 @@ CREATE TABLE fre_monitor_db.api__error_http_code
     status_code UInt16 COMMENT 'HTTP 状态码',
     error_reason String COMMENT '失败原因',
     model LowCardinality(String) COMMENT '机型',
-    create_time DateTime DEFAULT now() COMMENT '插入表时间，INSERT时通过now()创建',
+    create_time DateTime DEFAULT now('Asia/Shanghai') COMMENT '插入表时间，INSERT时通过now()创建',
 
     INDEX url_idx url TYPE tokenbf_v1(65536, 4, 0) GRANULARITY 3,
     INDEX status_code_idx status_code TYPE minmax GRANULARITY 2
@@ -140,7 +140,7 @@ CREATE TABLE fre_monitor_db.api__error_business_code
     error_code UInt16 COMMENT '业务异常码',
     error_reason String COMMENT '失败原因',
     model LowCardinality(String) COMMENT '机型',
-    create_time DateTime DEFAULT now() COMMENT '插入表时间，INSERT时通过now()创建',
+    create_time DateTime DEFAULT now('Asia/Shanghai') COMMENT '插入表时间，INSERT时通过now()创建',
 
     INDEX url_idx url TYPE tokenbf_v1(65536, 4, 0) GRANULARITY 3,
     INDEX status_code_idx status_code TYPE minmax GRANULARITY 2
@@ -165,7 +165,7 @@ CREATE TABLE fre_monitor_db.fre_log
     report_time DateTime64(3, 'Asia/Shanghai') COMMENT '上报时间',
     retry_times UInt8 COMMENT '重试次数',
     model LowCardinality(String) COMMENT '机型',
-    create_time DateTime DEFAULT now() COMMENT '插入表时间，INSERT时通过now()创建',
+    create_time DateTime DEFAULT now('Asia/Shanghai') COMMENT '插入表时间，INSERT时通过now()创建',
     log_type LowCardinality(String) COMMENT '日志级别: log,error',
     log_content String COMMENT '日志内容' CODEC(ZSTD(5)),
     log_keywords String COMMENT '日志关键字'
