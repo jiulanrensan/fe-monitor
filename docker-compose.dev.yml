@@ -1,0 +1,54 @@
+version: '3.8'
+
+services:
+  # 写服务 - 开发环境
+  write-service:
+    build:
+      context: .
+      dockerfile: packages/server/micro-service-write/Dockerfile
+      target: builder
+    container_name: micro-service-write-dev
+    ports:
+      - '${WRITE_SERVICE_PORT:-3001}:3001'
+    environment:
+      - NODE_ENV=development
+      - CLICKHOUSE_HOST=${CLICKHOUSE_HOST:-localhost}
+      - CLICKHOUSE_PORT=${CLICKHOUSE_PORT:-8123}
+      - CLICKHOUSE_USER=${CLICKHOUSE_USER:-default}
+      - CLICKHOUSE_PASSWORD=${CLICKHOUSE_PASSWORD:-}
+      - CLICKHOUSE_DB=${CLICKHOUSE_DB:-default}
+    volumes:
+      - ./packages/server/micro-service-write:/app/micro-service-write
+      - /app/node_modules
+    restart: unless-stopped
+    networks:
+      - app-network
+    command: ['pnpm', 'run', 'dev:write']
+
+  # 读服务 - 开发环境
+  read-service:
+    build:
+      context: .
+      dockerfile: packages/server/micro-service-read/Dockerfile
+      target: builder
+    container_name: micro-service-read-dev
+    ports:
+      - '${READ_SERVICE_PORT:-3000}:3000'
+    environment:
+      - NODE_ENV=development
+      - CLICKHOUSE_HOST=${CLICKHOUSE_HOST:-localhost}
+      - CLICKHOUSE_PORT=${CLICKHOUSE_PORT:-8123}
+      - CLICKHOUSE_USER=${CLICKHOUSE_USER:-default}
+      - CLICKHOUSE_PASSWORD=${CLICKHOUSE_PASSWORD:-}
+      - CLICKHOUSE_DB=${CLICKHOUSE_DB:-default}
+    volumes:
+      - ./packages/server/micro-service-read:/app/micro-service-read
+      - /app/node_modules
+    restart: unless-stopped
+    networks:
+      - app-network
+    command: ['pnpm', 'run', 'dev:read']
+
+networks:
+  app-network:
+    driver: bridge
