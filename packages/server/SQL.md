@@ -32,6 +32,7 @@ GRANT SELECT ON fre_monitor_db.* TO fre_monitor_user
 ```shell
 CREATE TABLE fre_monitor_db.api__duration
 (
+    pid LowCardinality(String) COMMENT '项目id',
     aid LowCardinality(String) COMMENT '应用id',
     sid String COMMENT '会话id 应用生命周期内唯一',
     uid String COMMENT '用户id',
@@ -57,8 +58,8 @@ CREATE TABLE fre_monitor_db.api__duration
 )
 ENGINE = MergeTree()
 PARTITION BY toYYYYMMDD(report_time)
-ORDER BY (report_time, aid)
-TTL report_time + INTERVAL 7 DAY
+ORDER BY (report_time, pid, aid)
+TTL report_time + INTERVAL 3 DAY
 SETTINGS index_granularity = 8192;
 ```
 
@@ -67,6 +68,7 @@ SETTINGS index_granularity = 8192;
 ```shell
 CREATE TABLE fre_monitor_db.api__body_size
 (
+    pid LowCardinality(String) COMMENT '项目id',
     aid LowCardinality(String) COMMENT '应用id',
     sid String COMMENT '会话id 应用生命周期内唯一',
     uid String COMMENT '用户id',
@@ -86,8 +88,8 @@ CREATE TABLE fre_monitor_db.api__body_size
 )
 ENGINE = MergeTree()
 PARTITION BY toYYYYMMDD(report_time)
-ORDER BY (report_time, aid)
-TTL report_time + INTERVAL 7 DAY
+ORDER BY (report_time, pid, aid)
+TTL report_time + INTERVAL 3 DAY
 SETTINGS index_granularity = 8192;
 ```
 
@@ -96,6 +98,7 @@ SETTINGS index_granularity = 8192;
 ```shell
 CREATE TABLE fre_monitor_db.api__error_http_code
 (
+    pid LowCardinality(String) COMMENT '项目id',
     aid LowCardinality(String) COMMENT '应用id',
     sid String COMMENT '会话id 应用生命周期内唯一',
     uid String COMMENT '用户id',
@@ -114,8 +117,8 @@ CREATE TABLE fre_monitor_db.api__error_http_code
 )
 ENGINE = MergeTree()
 PARTITION BY toYYYYMMDD(report_time)
-ORDER BY (report_time, aid)
-TTL report_time + INTERVAL 7 DAY
+ORDER BY (report_time, pid, aid)
+TTL report_time + INTERVAL 3 DAY
 SETTINGS index_granularity = 8192;
 ```
 
@@ -124,6 +127,7 @@ SETTINGS index_granularity = 8192;
 ```shell
 CREATE TABLE fre_monitor_db.api__error_business_code
 (
+    pid LowCardinality(String) COMMENT '项目id',
     aid LowCardinality(String) COMMENT '应用id',
     sid String COMMENT '会话id 应用生命周期内唯一',
     uid String COMMENT '用户id',
@@ -133,7 +137,7 @@ CREATE TABLE fre_monitor_db.api__error_business_code
     url String CODEC(ZSTD(5)),
     method LowCardinality(String),
     status_code UInt16 COMMENT 'HTTP 状态码',
-    error_code UInt16 COMMENT '业务异常码'
+    error_code UInt16 COMMENT '业务异常码',
     error_reason String COMMENT '失败原因',
     model LowCardinality(String) COMMENT '机型',
     create_time DateTime DEFAULT now() COMMENT '插入表时间，INSERT时通过now()创建',
@@ -143,8 +147,33 @@ CREATE TABLE fre_monitor_db.api__error_business_code
 )
 ENGINE = MergeTree()
 PARTITION BY toYYYYMMDD(report_time)
-ORDER BY (report_time, aid)
-TTL report_time + INTERVAL 7 DAY
+ORDER BY (report_time, pid, aid)
+TTL report_time + INTERVAL 3 DAY
+SETTINGS index_granularity = 8192;
+```
+
+### 前端日志表
+
+```shell
+CREATE TABLE fre_monitor_db.fre_log
+(
+    pid LowCardinality(String) COMMENT '项目id',
+    aid LowCardinality(String) COMMENT '应用id',
+    sid String COMMENT '会话id 应用生命周期内唯一',
+    uid String COMMENT '用户id',
+    log_time DateTime64(3, 'Asia/Shanghai') COMMENT '记录时间',
+    report_time DateTime64(3, 'Asia/Shanghai') COMMENT '上报时间',
+    retry_times UInt8 COMMENT '重试次数',
+    model LowCardinality(String) COMMENT '机型',
+    create_time DateTime DEFAULT now() COMMENT '插入表时间，INSERT时通过now()创建',
+    log_type LowCardinality(String) COMMENT '日志级别: log,error',
+    log_content String COMMENT '日志内容' CODEC(ZSTD(5)),
+    log_keywords String COMMENT '日志关键字'
+)
+ENGINE = MergeTree()
+PARTITION BY toYYYYMMDD(report_time)
+ORDER BY (report_time, pid, aid)
+TTL report_time + INTERVAL 3 DAY
 SETTINGS index_granularity = 8192;
 ```
 
