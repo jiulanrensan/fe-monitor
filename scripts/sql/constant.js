@@ -8,11 +8,13 @@ export default {
     // 'api__error_business_code',
     // 'api__error_http_code',
     // 'api__body_size',
-    table: 'api__duration', // 改这个
+    // 'fre_log',
+    table: 'fre_log', // 改这个
     tableMap: {
         api__duration: 'api__duration',
         api__error_business_code: 'api__error_business_code',
         api__error_http_code: 'api__error_http_code',
         api__body_size: 'api__body_size',
+        fre_log: 'fre_log',
     }
 }

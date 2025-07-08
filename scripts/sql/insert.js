@@ -87,6 +87,10 @@ function generateTestData(count = 1) {
             res_body_size,
             error_code: [1000, 1001, 1002, 1003, 1004, 1005][Math.floor(Math.random() * 6)],
             error_reason: `error_reason_${Math.floor(Math.random() * 1000)}`,
+            // 前端日志
+            log_type: ['log', 'error'][Math.floor(Math.random() * 2)],
+            log_content: `log_content_${Math.floor(Math.random() * 1000)}`,
+            log_keywords: `log_keywords_${Math.floor(Math.random() * 1000)}`,
         };
         
         data.push(item);
@@ -179,6 +183,22 @@ const sqlFnMap = {
             '${item.model}'
         )`).join(', ');
         const insertSQL = `INSERT INTO ${tableName} (pid, aid, sid, uid, log_time, report_time, retry_times, url, method, status_code, req_body_size, res_body_size, model) VALUES ${sqlValues}`;
+        return insertSQL;
+    },
+    [tableMap.fre_log]: (data, tableName) => {
+        const sqlValues = data.map(item => `(
+            '${item.pid}',
+            '${item.aid}',
+            '${item.sid}',
+            '${item.uid}',
+            ${item.log_time},
+            ${item.report_time},
+            ${item.retry_times},
+            '${item.log_content}',
+            '${item.log_keywords}',
+            '${item.log_type}'
+        )`).join(', ');
+        const insertSQL = `INSERT INTO ${tableName} (pid, aid, sid, uid, log_time, report_time, retry_times, log_content, log_keywords, log_type) VALUES ${sqlValues}`;
         return insertSQL;
     }
 }
