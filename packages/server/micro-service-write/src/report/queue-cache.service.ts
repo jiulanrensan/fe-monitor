@@ -7,6 +7,9 @@ export interface QueueConfig {
   flushInterval: number // 刷新间隔（毫秒）
   retryAttempts?: number // 重试次数
   retryDelay?: number // 重试延迟（毫秒）
+  minFlushSize?: number // 定时器触发时的最小刷新数量
+  maxTimerSkips?: number // 定时器最大跳过次数
+  maxDataAge?: number // 数据最大年龄（毫秒）
 }
 
 export interface QueueItem<T = any> {
@@ -14,10 +17,15 @@ export interface QueueItem<T = any> {
   timestamp: number
 }
 
+export interface QueueState {
+  items: QueueItem[]
+  timerSkipCount: number // 定时器跳过次数
+}
+
 @Injectable()
 export class QueueCacheService implements OnModuleDestroy {
   private readonly logger = new Logger(QueueCacheService.name)
-  private readonly queues = new Map<string, QueueItem[]>()
+  private readonly queues = new Map<string, QueueState>()
   private readonly timers = new Map<string, NodeJS.Timeout>()
   private readonly tableConfigs = new Map<string, QueueConfig>()
   private readonly defaultConfig: QueueConfig = DEFAULT_QUEUE_CONFIG
@@ -46,7 +54,10 @@ export class QueueCacheService implements OnModuleDestroy {
 
     // 获取或创建队列
     if (!this.queues.has(tableName)) {
-      this.queues.set(tableName, [])
+      this.queues.set(tableName, {
+        items: [],
+        timerSkipCount: 0
+      })
       this.startTimer(tableName, queueConfig.flushInterval)
     }
 
@@ -56,10 +67,10 @@ export class QueueCacheService implements OnModuleDestroy {
       timestamp: Date.now()
     }
 
-    queue.push(queueItem)
+    queue.items.push(queueItem)
 
     // 检查队列长度是否达到阈值
-    if (queue.length >= queueConfig.maxSize) {
+    if (queue.items.length >= queueConfig.maxSize) {
       this.logger.log(`Queue for table ${tableName} is full, flushing...`)
       await this.flushQueue(tableName)
     }
@@ -73,27 +84,28 @@ export class QueueCacheService implements OnModuleDestroy {
     const queue = this.queues.get(tableName)
     const queueConfig = this.tableConfigs.get(tableName) || this.defaultConfig
 
-    if (!queue || queue.length === 0) {
+    if (!queue || queue.items.length === 0) {
       this.logger.log(`Queue for table ${tableName} is empty, skipping flush`)
       return
     }
 
-    // 如果是定时器触发的刷新，且队列长度小于阈值的一半，则跳过
+    // 如果是定时器触发的刷新，检查是否需要跳过
     const isTimerTriggered = !this.isManualFlush
-    if (isTimerTriggered && queue.length < queueConfig.maxSize / 2) {
-      this.logger.log(
-        `Queue for table ${tableName} is too small (${queue.length}/${queueConfig.maxSize}), skipping timer flush`
-      )
-      return
+    if (isTimerTriggered) {
+      const shouldSkip = this.shouldSkipTimerFlush(tableName, queue, queueConfig)
+      if (shouldSkip) {
+        return
+      }
     }
 
-    const dataToInsert = queue.map((item) => item.data)
+    const dataToInsert = queue.items.map((item) => item.data)
     let retryCount = 0
 
     while (retryCount <= queueConfig.retryAttempts!) {
       try {
         // 清空队列（在插入前清空，避免重复插入）
-        queue.length = 0
+        queue.items.length = 0
+        queue.timerSkipCount = 0
 
         // 批量插入数据
         // 插入失败返回 null
@@ -116,7 +128,7 @@ export class QueueCacheService implements OnModuleDestroy {
           this.logger.error(
             `Max retry attempts reached for table ${tableName}, restoring ${dataToInsert.length} items to queue`
           )
-          //   queue.push(...dataToInsert.map((data) => ({ data, timestamp: Date.now() })))
+          //   queue.items.push(...dataToInsert.map((data) => ({ data, timestamp: Date.now() })))
         }
       } catch (error) {
         this.logger.error(
@@ -125,6 +137,48 @@ export class QueueCacheService implements OnModuleDestroy {
         )
       }
     }
+  }
+
+  /**
+   * 判断是否应该跳过定时器触发的刷新
+   * @param tableName 表名
+   * @param queue 队列状态
+   * @param config 队列配置
+   * @returns 是否应该跳过
+   */
+  private shouldSkipTimerFlush(tableName: string, queue: QueueState, config: QueueConfig): boolean {
+    const minFlushSize = config.minFlushSize || Math.max(1, Math.floor(config.maxSize / 4))
+    const maxTimerSkips = config.maxTimerSkips || 3
+    const maxDataAge = config.maxDataAge || 30000 // 默认30秒
+
+    // 检查队列长度
+    if (queue.items.length < minFlushSize) {
+      queue.timerSkipCount++
+
+      // 检查是否超过最大跳过次数
+      if (queue.timerSkipCount >= maxTimerSkips) {
+        this.logger.log(
+          `Queue for table ${tableName} has been skipped ${queue.timerSkipCount} times, forcing flush with ${queue.items.length} items`
+        )
+        return false // 强制刷新
+      }
+
+      // 检查数据年龄
+      const oldestItem = queue.items[0]
+      if (oldestItem && Date.now() - oldestItem.timestamp > maxDataAge) {
+        this.logger.log(
+          `Queue for table ${tableName} has old data (${Date.now() - oldestItem.timestamp}ms), forcing flush with ${queue.items.length} items`
+        )
+        return false // 强制刷新
+      }
+
+      this.logger.log(
+        `Queue for table ${tableName} is too small (${queue.items.length}/${minFlushSize}), skipping timer flush (skip count: ${queue.timerSkipCount})`
+      )
+      return true
+    }
+
+    return false
   }
 
   /**
@@ -201,7 +255,7 @@ export class QueueCacheService implements OnModuleDestroy {
 
     for (const [tableName, queue] of this.queues.entries()) {
       status[tableName] = {
-        size: queue.length,
+        size: queue.items.length,
         config: this.tableConfigs.get(tableName) || this.defaultConfig
       }
     }

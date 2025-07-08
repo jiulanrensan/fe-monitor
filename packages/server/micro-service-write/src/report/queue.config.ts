@@ -13,7 +13,10 @@ export const DEFAULT_QUEUE_CONFIG: QueueConfig = {
   maxSize: 100,
   flushInterval: 30000, // 30秒
   retryAttempts: 3,
-  retryDelay: 1000 // 1秒
+  retryDelay: 1000, // 1秒
+  minFlushSize: 25, // 定时器触发时的最小刷新数量（maxSize的1/4）
+  maxTimerSkips: 3, // 定时器最大跳过次数
+  maxDataAge: 60000 // 数据最大年龄（60秒，flushInterval的2倍）
 }
 
 /**

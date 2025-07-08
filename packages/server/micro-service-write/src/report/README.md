@@ -65,6 +65,9 @@ interface QueueConfig {
   flushInterval: number // 刷新间隔（毫秒）
   retryAttempts?: number // 重试次数
   retryDelay?: number // 重试延迟（毫秒）
+  minFlushSize?: number // 定时器触发时的最小刷新数量
+  maxTimerSkips?: number // 定时器最大跳过次数
+  maxDataAge?: number // 数据最大年龄（毫秒）
 }
 ```
 
@@ -78,7 +81,11 @@ interface QueueConfig {
 
 - 使用 `setTimeout` 而不是 `setInterval`，避免定时器重叠执行
 - 每次执行完成后重新启动定时器，确保间隔准确
-- 定时器触发时，如果队列长度小于阈值的一半，则跳过刷新（避免频繁的小批量插入）
+- 智能跳过策略：
+  - 如果队列长度小于 `minFlushSize`（默认maxSize的1/4），则跳过刷新
+  - 如果连续跳过次数超过 `maxTimerSkips`（默认3次），则强制刷新
+  - 如果数据在队列中停留时间超过 `maxDataAge`（默认30秒），则强制刷新
+- 确保数据不会因为上报频率低而长期积压在内存中
 
 ### 4. 直接从类定义获取字段
 
@@ -288,11 +295,24 @@ Content-Type: application/json
 {
   "maxSize": 50,
   "flushInterval": 3000,
-  "retryAttempts": 2
+  "retryAttempts": 2,
+  "minFlushSize": 10,
+  "maxTimerSkips": 5,
+  "maxDataAge": 60000
 }
 ```
 
 动态配置指定表的队列参数。
+
+#### 配置参数说明
+
+- **maxSize**: 队列最大长度，达到此值时立即刷新
+- **flushInterval**: 定时器刷新间隔（毫秒）
+- **retryAttempts**: 插入失败时的重试次数
+- **retryDelay**: 重试间隔（毫秒）
+- **minFlushSize**: 定时器触发时的最小刷新数量（默认maxSize的1/4）
+- **maxTimerSkips**: 定时器最大跳过次数（默认3次）
+- **maxDataAge**: 数据最大年龄（毫秒，默认30秒）
 
 ## 错误处理
 
