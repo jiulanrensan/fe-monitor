@@ -30,6 +30,7 @@ export class BaseDto {
   @IsEnum(MONITOR_TYPE, { message: '类型错误' })
   type: MONITOR_TYPE
 
+  @IsOptional()
   @IsEnum(API_SUB_TYPE, { message: '类型错误' })
-  subType: API_SUB_TYPE
+  subType?: API_SUB_TYPE
 }

@@ -13,6 +13,10 @@ export enum MONITOR_TYPE {
    */
   API = 'API',
   /**
+   * 前端日志类型: 前端日志相关(包含前端日志打印)
+   */
+  FRE_LOG = 'FRE_LOG',
+  /**
    * 错误类型，代码异常
    */
   ERROR = 'ERROR',

@@ -11,6 +11,7 @@ import {
 } from './dto'
 import { extractDataFromDto } from 'shared/src'
 import { QueueCacheService } from './queue-cache.service'
+import { FreLogReportDto } from './dto/fre-log.dto'
 
 @Injectable()
 export class ReportService {
@@ -84,6 +85,7 @@ export class ReportService {
   }
 
   /**
+   * todo 待开发
    * 上报性能监控数据
    */
   async reportPerformance(data: any): Promise<void> {
@@ -91,9 +93,14 @@ export class ReportService {
   }
 
   /**
+   * todo 待开发
    * 上报错误监控数据
    */
   async reportError(data: any): Promise<void> {
     return this.report(data, ErrorDto, 'error_logs', 'ErrorDto')
+  }
+
+  async reportFreLog(data: any): Promise<void> {
+    return this.report(data, FreLogReportDto)
   }
 }

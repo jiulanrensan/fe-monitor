@@ -28,3 +28,8 @@ export const API_ERROR_HTTP_CODE_TABLE =
  */
 export const API_ERROR_BUSINESS_CODE_TABLE =
   API_EVENT_TYPE[`${MONITOR_TYPE.API}__${API_SUB_TYPE.ERROR_BUSINESS_CODE}`].toLowerCase()
+
+/**
+ * 前端日志表名
+ */
+export const FRE_LOG_TABLE = `${MONITOR_TYPE.FRE_LOG}`.toLowerCase()

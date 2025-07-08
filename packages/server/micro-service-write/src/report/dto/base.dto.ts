@@ -44,3 +44,14 @@ export class ErrorDto extends BaseDto {
   @IsOptional()
   errorStack?: string
 }
+
+export class FreLogDto extends BaseDto {
+  @IsString()
+  logType: string
+
+  @IsString()
+  logContent: string
+
+  @IsString()
+  logKeywords: string
+}

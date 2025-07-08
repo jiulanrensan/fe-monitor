@@ -12,6 +12,7 @@ import {
 import { BaseDto } from '../dto'
 import { MONITOR_TYPE, API_SUB_TYPE } from '../../../shared/src'
 import { validate } from 'class-validator'
+import { FreLogReportDto } from './dto/fre-log.dto'
 
 /**
  * 策略接口
@@ -147,7 +148,8 @@ export class ReportController {
     const strategyConfigs = [
       { type: MONITOR_TYPE.API, strategy: ApiReportStrategy },
       { type: MONITOR_TYPE.PERFORMANCE, strategy: PerformanceReportStrategy },
-      { type: MONITOR_TYPE.ERROR, strategy: ErrorReportStrategy }
+      { type: MONITOR_TYPE.ERROR, strategy: ErrorReportStrategy },
+      { type: MONITOR_TYPE.FRE_LOG, strategy: FreLogReportStrategy }
     ]
 
     strategyConfigs.forEach(({ type, strategy }) => {
@@ -280,5 +282,23 @@ class ErrorReportStrategy extends BaseReportStrategy<ErrorDto> {
 
   getStrategyName(): string {
     return MONITOR_TYPE.ERROR
+  }
+}
+
+class FreLogReportStrategy extends BaseReportStrategy<FreLogReportDto> {
+  constructor(reportService: ReportService, logger: Logger) {
+    super(reportService, logger, FreLogReportDto)
+  }
+
+  protected detectSubType(data: any): SubTypeConfig | null {
+    // 没有子类型
+    return null
+  }
+  protected async handleWithBaseType(data: any): Promise<void> {
+    await this.reportService.reportFreLog(data as FreLogReportDto)
+  }
+
+  getStrategyName(): string {
+    return MONITOR_TYPE.FRE_LOG
   }
 }
