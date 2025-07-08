@@ -109,7 +109,7 @@ export class QueryController {
       return {
         success: true,
         data: result,
-        count: result.length
+        count: result.data.length
       }
     } catch (error) {
       this.logger.error(`Query execution failed: ${error.message}`, error.stack)
@@ -139,7 +139,7 @@ export class QueryController {
       return {
         success: true,
         data: result,
-        count: result.length
+        count: result.data.length
       }
     } catch (error) {
       this.logger.error(`Aggregation query failed: ${error.message}`, error.stack)
@@ -159,9 +159,9 @@ export class QueryController {
   @Post('apiDurationCount')
   async apiDurationCount(@Body() dto: ApiDurationQueryDto) {
     try {
-      this.logger.log(
-        `Getting data count for app: ${dto.aid}, duration: ${dto.duration}, threshold: ${dto.threshold}`
-      )
+      // this.logger.log(
+      //   `Getting data count for app: ${dto.aid}, duration: ${dto.duration}, threshold: ${dto.threshold}`
+      // )
       const result = await this.queryService.apiDurationCount(
         dto.timeRange,
         dto.duration,

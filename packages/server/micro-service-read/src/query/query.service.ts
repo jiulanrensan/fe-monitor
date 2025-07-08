@@ -22,7 +22,7 @@ export class QueryService {
   /**
    * 查询表结构
    */
-  async getTableSchema(tableName: string): Promise<any[]> {
+  async getTableSchema(tableName: string): Promise<{ data: any[]; stats: any }> {
     const query = `DESCRIBE TABLE ${tableName}`
     this.logger.log(`Getting schema for table: ${tableName}`)
     return this.clickHouseService.query(query)
@@ -31,7 +31,7 @@ export class QueryService {
   /**
    * 查询表列表
    */
-  async getTables(): Promise<any[]> {
+  async getTables(): Promise<{ data: any[]; stats: any }> {
     const query = `SHOW TABLES`
     this.logger.log('Getting table list')
     return this.clickHouseService.query(query)
@@ -40,7 +40,7 @@ export class QueryService {
   /**
    * 查询数据库列表
    */
-  async getDatabases(): Promise<any[]> {
+  async getDatabases(): Promise<{ data: any[]; stats: any }> {
     const query = `SHOW DATABASES`
     this.logger.log('Getting database list')
     return this.clickHouseService.query(query)
@@ -49,7 +49,7 @@ export class QueryService {
   /**
    * 执行自定义查询
    */
-  async executeQuery<T = any>(query: string): Promise<T[]> {
+  async executeQuery<T = any>(query: string): Promise<{ data: T[]; stats: any }> {
     this.logger.log(`Executing query: ${query}`)
     return this.clickHouseService.query<T>(query)
   }
@@ -62,7 +62,7 @@ export class QueryService {
     aggregation: string,
     groupBy?: string,
     where?: string
-  ): Promise<T[]> {
+  ): Promise<{ data: T[]; stats: any }> {
     let query = `SELECT ${aggregation} FROM ${tableName}`
 
     if (where) {
@@ -85,7 +85,7 @@ export class QueryService {
     duration: number,
     aid: string,
     threshold: number
-  ): Promise<ApiDurationResponseDto[]> {
+  ): Promise<{ data: ApiDurationResponseDto[]; stats: any }> {
     // 构建查询条件
     const conditions = [
       `report_time >= '${timeRange.start}'`,
@@ -118,7 +118,7 @@ export class QueryService {
     reqBodySize: number,
     resBodySize: number,
     threshold: number
-  ): Promise<ApiBodySizeResponseDto[]> {
+  ): Promise<{ data: ApiBodySizeResponseDto[]; stats: any }> {
     // 构建查询条件
     const conditions = [
       `report_time >= '${timeRange.start}'`,
@@ -149,7 +149,7 @@ export class QueryService {
     statusCode: number,
     useGreaterEqual: boolean = true,
     threshold: number
-  ): Promise<ApiErrorHttpCodeResponseDto[]> {
+  ): Promise<{ data: ApiErrorHttpCodeResponseDto[]; stats: any }> {
     // 构建查询条件
     const conditions = [
       `report_time >= '${timeRange.start}'`,
@@ -176,7 +176,7 @@ export class QueryService {
     aid: string,
     errorCodes: number[],
     threshold: number
-  ): Promise<ApiErrorBusinessCodeResponseDto[]> {
+  ): Promise<{ data: ApiErrorBusinessCodeResponseDto[]; stats: any }> {
     // 构建查询条件
     const conditions = [
       `report_time >= '${timeRange.start}'`,

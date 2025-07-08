@@ -109,12 +109,13 @@ export class SchedulerService implements OnModuleInit {
         config.threshold
       )
 
-      if (this.alertService.shouldAlert(result)) {
+      if (this.alertService.shouldAlert(result.data)) {
         await this.alertService.handleAlert({
           eventName: 'api-duration-monitor',
-          data: result,
+          data: result.data,
+          stats: result.stats,
           timestamp: now.toISOString(),
-          description: `发现${result.length}个API接口耗时超过${config.duration}ms`
+          description: `发现${result.data.length}个API接口耗时超过${config.duration}ms`
         })
       }
     } catch (error) {
@@ -141,12 +142,13 @@ export class SchedulerService implements OnModuleInit {
         config.threshold
       )
 
-      if (this.alertService.shouldAlert(result)) {
+      if (this.alertService.shouldAlert(result.data)) {
         await this.alertService.handleAlert({
           eventName: 'api-body-size-monitor',
-          data: result,
+          data: result.data,
+          stats: result.stats,
           timestamp: now.toISOString(),
-          description: `发现${result.length}个API接口请求体大小超过阈值`
+          description: `发现${result.data.length}个API接口请求体大小超过阈值`
         })
       }
     } catch (error) {
@@ -173,12 +175,13 @@ export class SchedulerService implements OnModuleInit {
         config.threshold
       )
 
-      if (this.alertService.shouldAlert(result)) {
+      if (this.alertService.shouldAlert(result.data)) {
         await this.alertService.handleAlert({
           eventName: 'api-error-http-code-monitor',
-          data: result,
+          data: result.data,
+          stats: result.stats,
           timestamp: now.toISOString(),
-          description: `发现${result.length}个API接口HTTP错误状态码异常`
+          description: `发现${result.data.length}个API接口HTTP错误状态码异常`
         })
       }
     } catch (error) {
@@ -204,12 +207,13 @@ export class SchedulerService implements OnModuleInit {
         config.threshold
       )
 
-      if (this.alertService.shouldAlert(result)) {
+      if (this.alertService.shouldAlert(result.data)) {
         await this.alertService.handleAlert({
           eventName: 'api-error-business-code-monitor',
-          data: result,
+          data: result.data,
+          stats: result.stats,
           timestamp: now.toISOString(),
-          description: `发现${result.length}个API接口业务错误码异常`
+          description: `发现${result.data.length}个API接口业务错误码异常`
         })
       }
     } catch (error) {

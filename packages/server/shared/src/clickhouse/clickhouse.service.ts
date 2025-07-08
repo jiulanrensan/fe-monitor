@@ -11,16 +11,29 @@ export class ClickHouseService {
 
   constructor(@Inject(CLICKHOUSE_CLIENT) private readonly client: ClickHouseClient) {}
 
-  async query<T = any>(query: string): Promise<T[]> {
+  async query<T = any>(query: string): Promise<{ data: T[]; stats: any }> {
     try {
       const result = await this.client.query({
         query,
         format: 'JSONEachRow'
       })
-      return result.json<T>()
+      this.logger.log(`ClickHouse query result: ${JSON.stringify(result.response_headers)}`)
+      const responseHeaders = result.response_headers
+      const summaryHeader = responseHeaders['x-clickhouse-summary']
+      const summary = JSON.parse(
+        Array.isArray(summaryHeader) ? summaryHeader[0] || '{}' : summaryHeader || '{}'
+      )
+      const data = await result.json<T>()
+      return {
+        data,
+        stats: summary
+      }
     } catch (error) {
       this.logger.error(`ClickHouse query failed: ${error.message}`, error.stack)
-      return []
+      return {
+        data: [],
+        stats: {}
+      }
     }
   }
 

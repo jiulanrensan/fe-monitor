@@ -3,6 +3,7 @@ import { Injectable, Logger } from '@nestjs/common'
 export interface AlertData {
   eventName: string
   data: any[]
+  stats: any
   timestamp: string
   description: string
 }
