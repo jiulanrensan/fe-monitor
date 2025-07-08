@@ -2,6 +2,7 @@ import { Global, Logger, Module, OnModuleInit } from '@nestjs/common'
 import { createClickHouseClient } from './clickhouse.provider'
 import { ClickHouseService } from './clickhouse.service'
 import { ClickHouseHealthService } from './clickhouse-health.service'
+import { ClickHouseConnectionManagerService } from './clickhouse-connection-manager.service'
 
 /**
  * ClickHouse 模块
@@ -9,8 +10,13 @@ import { ClickHouseHealthService } from './clickhouse-health.service'
  */
 @Global()
 @Module({
-  providers: [createClickHouseClient(), ClickHouseService, ClickHouseHealthService],
-  exports: [ClickHouseService, ClickHouseHealthService]
+  providers: [
+    createClickHouseClient(),
+    ClickHouseService,
+    ClickHouseHealthService,
+    ClickHouseConnectionManagerService
+  ],
+  exports: [ClickHouseService, ClickHouseHealthService, ClickHouseConnectionManagerService]
 })
 export class ClickHouseModule implements OnModuleInit {
   private readonly logger = new Logger(ClickHouseModule.name)

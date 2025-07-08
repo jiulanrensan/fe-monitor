@@ -10,6 +10,7 @@ export * from './decorators/clickhouse-table.decorator'
 // 工具相关导出
 export * from './utils/dto-extractor.util'
 export * from './utils/report.util'
+export * from './utils/graceful-shutdown.service'
 
 // 可以在这里添加其他共享模块的导出
 // export * from './other-module';
