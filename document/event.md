@@ -15,7 +15,11 @@ const MONITOR_TYPE = {
   /**
    * 性能类型: 页面性能相关(包含页面加载、页面渲染、页面交互)
    */
-  PERFORMANCE: 'PERFORMANCE'
+  PERFORMANCE: 'PERFORMANCE',
+  /**
+   * 前端日志打印
+   */
+  FRE_LOG: 'FRE_LOG'
 } as const
 ```
 
@@ -31,7 +35,7 @@ retryTimes # 重试次数
 model # 机型
 ```
 
-## 每个大类下细分小类
+## 每个大类下可以细分小类
 
 名称规范为：`前缀为大类名称+'__'+细分小类名称`
 

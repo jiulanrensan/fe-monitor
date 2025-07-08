@@ -259,6 +259,15 @@ SHOW TABLES FROM your_database;
 DESCRIBE TABLE my_table;
 ```
 
+### 删除表
+
+```shell
+DROP TABLE IF EXISTS fre_monitor_db.api__duration;
+DROP TABLE IF EXISTS fre_monitor_db.api__error_business_code;
+DROP TABLE IF EXISTS fre_monitor_db.api__error_http_code;
+DROP TABLE IF EXISTS fre_monitor_db.api__body_size;
+```
+
 # 踩坑记录
 
 ## insert报错
