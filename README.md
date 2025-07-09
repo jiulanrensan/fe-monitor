@@ -16,4 +16,7 @@ docker-compose logs -f
 
 # 停止服务
 docker-compose down
+
+# 查看构建产物
+docker run -it --rm --entrypoint /bin/sh fe-monitor-read-service:latest
 ```

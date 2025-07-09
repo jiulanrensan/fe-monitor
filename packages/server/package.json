@@ -1,15 +1,5 @@
 {
     "name": "@fe-monitor/server",
     "version": "1.0.0",
-    "description": "Frontend monitoring server package",
-    "type": "commonjs",
-    "scripts": {
-        "build:read": "nest build micro-service-read",
-        "build:write": "nest build micro-service-write",
-        "build": "nest build micro-service-read && nest build micro-service-write",
-        "start:read": "node micro-service-read/dist/main.js",
-        "start:write": "node micro-service-write/dist/main.js",
-        "dev:read": "nest start micro-service-read --watch",
-        "dev:write": "nest start micro-service-write --watch"
-    }
+    "description": "Frontend monitoring server package"
 }

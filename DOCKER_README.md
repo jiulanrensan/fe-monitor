@@ -1,240 +1,140 @@
-# Docker 部署指南
+# Docker 配置说明
 
-本项目提供了完整的 Docker 部署方案，包括开发环境和生产环境。
+本项目使用 Docker 进行容器化部署，支持生产环境和开发环境。
 
-## 环境配置
+## 项目结构
 
-### 环境变量
-
-创建 `.env` 文件来配置环境变量：
-
-```bash
-# 服务端口配置
-WRITE_SERVICE_PORT=3001
-READ_SERVICE_PORT=3000
-
-# ClickHouse 配置（需要外部提供）
-CLICKHOUSE_HOST=localhost
-CLICKHOUSE_PORT=8123
-CLICKHOUSE_USER=default
-CLICKHOUSE_PASSWORD=
-CLICKHOUSE_DB=default
+```
+fe-monitor/
+├── docker-compose.yml          # 生产环境配置
+├── docker-compose.dev.yml      # 开发环境配置
+├── .dockerignore              # Docker 忽略文件
+├── package.json               # 根目录依赖配置
+├── pnpm-lock.yaml            # pnpm 锁文件
+└── packages/
+    ├── server/
+    │   ├── micro-service-write/
+    │   │   └── Dockerfile     # 写服务 Dockerfile
+    │   └── micro-service-read/
+    │       └── Dockerfile     # 读服务 Dockerfile
+    └── shared/                # 共享模块
 ```
 
-## 开发环境
+## 设计特点
 
-### 启动开发环境
+1. **Monorepo 架构**: 使用根目录作为工作空间，所有服务共享根目录的依赖
+2. **pnpm 包管理**: 使用 pnpm 和根目录的 `pnpm-lock.yaml` 确保依赖版本一致
+3. **多阶段构建**: 构建阶段和生产阶段分离，优化镜像大小
+4. **独立服务**: 每个服务使用独立的 Dockerfile
+5. **统一管理**: 使用 docker-compose 统一管理所有服务
 
-```bash
-# 启动所有服务（开发模式）
-docker-compose -f docker-compose.dev.yml up -d
+## 环境变量
 
-# 查看日志
-docker-compose -f docker-compose.dev.yml logs -f
+支持以下环境变量配置：
 
-# 停止服务
-docker-compose -f docker-compose.dev.yml down
-```
-
-### 开发环境特性
-
-- 代码热重载
-- 源码映射到容器
-- 实时日志输出
-- 快速重启
+- `WRITE_SERVICE_PORT`: 写服务端口 (默认: 3001)
+- `READ_SERVICE_PORT`: 读服务端口 (默认: 3000)
+- `CLICKHOUSE_HOST`: ClickHouse 主机地址 (默认: localhost)
+- `CLICKHOUSE_PORT`: ClickHouse 端口 (默认: 8123)
+- `CLICKHOUSE_USER`: ClickHouse 用户名 (默认: default)
+- `CLICKHOUSE_PASSWORD`: ClickHouse 密码 (默认: 空)
+- `CLICKHOUSE_DB`: ClickHouse 数据库名 (默认: default)
 
 ## 生产环境
 
-### 启动生产环境
+### 构建和启动
 
 ```bash
-# 构建并启动所有服务
-docker-compose up -d --build
+# 构建镜像
+pnpm run docker:build
 
-# 查看服务状态
-docker-compose ps
+# 启动服务
+pnpm run docker:up
 
 # 查看日志
-docker-compose logs -f [service-name]
+pnpm run docker:logs
 
 # 停止服务
-docker-compose down
+pnpm run docker:down
+
+# 重启服务
+pnpm run docker:restart
 ```
 
-### 生产环境特性
+### 服务端口
 
-- 多阶段构建优化镜像大小
-- 非 root 用户运行
-- 健康检查
-- 自动重启策略
-- 资源限制
-- 优雅关闭
+- 写服务: 3001
+- 读服务: 3000
 
-## 服务说明
+## 开发环境
 
-### 微服务架构
-
-1. **write-service** (端口: 3001)
-   - 负责数据写入
-   - 处理监控数据上报
-   - 健康检查端点: `/health`
-
-2. **read-service** (端口: 3000)
-   - 负责数据查询
-   - 提供 API 查询接口
-   - 健康检查端点: `/health`
-
-### 网络配置
-
-- 所有服务通过 `app-network` 网络通信
-- 服务间使用容器名进行通信
-- 外部通过端口映射访问
-
-### ClickHouse 数据库
-
-**注意**: 本项目不包含 ClickHouse 数据库服务，您需要：
-
-- 使用外部 ClickHouse 实例
-- 或者单独部署 ClickHouse 容器
-- 确保通过环境变量正确配置连接信息
-
-## 健康检查
-
-### 服务健康检查
+### 构建和启动
 
 ```bash
-# 检查 write-service 健康状态
-curl http://localhost:3001/health
+# 构建开发镜像
+pnpm run docker:dev:build
 
-# 检查 read-service 健康状态
-curl http://localhost:3000/health
+# 启动开发服务
+pnpm run docker:dev:up
+
+# 查看开发日志
+pnpm run docker:dev:logs
+
+# 停止开发服务
+pnpm run docker:dev:down
 ```
 
-### Docker 健康检查
+### 开发特性
 
-```bash
-# 查看容器健康状态
-docker ps
+- 代码热重载: 源代码目录挂载到容器中
+- 依赖缓存: node_modules 使用 Docker 卷缓存
+- 实时日志: 支持实时查看服务日志
 
-# 查看健康检查日志
-docker inspect --format='{{json .State.Health}}' [container-name]
-```
+## Dockerfile 说明
 
-## 监控和日志
+### 构建阶段 (builder)
 
-### 查看日志
+1. 使用 Node.js 18 Alpine 镜像
+2. 安装 pnpm 包管理器
+3. 复制根目录依赖文件 (`package.json`, `pnpm-lock.yaml`)
+4. 复制 TypeScript 配置文件
+5. 使用 pnpm 安装依赖
+6. 复制源代码
+7. 构建项目
 
-```bash
-# 查看所有服务日志
-docker-compose logs -f
+### 生产阶段 (production)
 
-# 查看特定服务日志
-docker-compose logs -f write-service
-docker-compose logs -f read-service
-```
+1. 使用 Node.js 18 Alpine 镜像
+2. 安装 dumb-init 用于信号处理
+3. 创建非 root 用户
+4. 复制构建产物
+5. 安装生产依赖
+6. 配置启动命令
 
-### 资源监控
+## 注意事项
 
-```bash
-# 查看容器资源使用情况
-docker stats
-
-# 查看特定容器资源使用
-docker stats write-service read-service
-```
+1. 确保根目录的 `pnpm-lock.yaml` 文件存在且是最新的
+2. 开发环境使用卷挂载，修改代码会自动重载
+3. 生产环境使用多阶段构建，镜像更小更安全
+4. 所有服务都配置了健康检查
+5. 使用 dumb-init 确保容器信号处理正确
 
 ## 故障排除
 
-### 常见问题
+### 构建失败
 
-1. **端口冲突**
+1. 检查 `pnpm-lock.yaml` 文件是否存在
+2. 确认所有依赖文件都已复制到 Docker 上下文
+3. 检查网络连接，确保能正常下载依赖
 
-   ```bash
-   # 检查端口占用
-   netstat -tulpn | grep :3000
-   netstat -tulpn | grep :3001
-   ```
+### 服务启动失败
 
-2. **容器启动失败**
+1. 检查端口是否被占用
+2. 确认环境变量配置正确
+3. 查看容器日志: `docker-compose logs <service-name>`
 
-   ```bash
-   # 查看容器日志
-   docker-compose logs [service-name]
+### 开发环境热重载不工作
 
-   # 重新构建镜像
-   docker-compose build --no-cache
-   ```
-
-3. **ClickHouse 连接失败**
-
-   ```bash
-   # 检查 ClickHouse 是否可访问
-   curl http://localhost:8123/ping
-
-   # 检查环境变量配置
-   docker-compose exec write-service env | grep CLICKHOUSE
-   ```
-
-### 清理资源
-
-```bash
-# 停止并删除所有容器
-docker-compose down
-
-# 删除所有镜像
-docker-compose down --rmi all
-
-# 完全清理（谨慎使用）
-docker system prune -a --volumes
-```
-
-## 性能优化
-
-### 资源限制
-
-生产环境已配置资源限制：
-
-- 微服务: 512MB 内存, 0.5 CPU
-
-### 镜像优化
-
-- 使用多阶段构建
-- 只安装生产依赖
-- 使用 Alpine Linux 基础镜像
-- 配置 .dockerignore 排除不必要文件
-
-## 安全建议
-
-1. 修改默认的 ClickHouse 密码
-2. 使用非 root 用户运行容器
-3. 限制容器网络访问
-4. 定期更新基础镜像
-5. 启用容器安全扫描
-
-## 扩展部署
-
-### 使用 Docker Swarm
-
-```bash
-# 初始化 Swarm
-docker swarm init
-
-# 部署服务
-docker stack deploy -c docker-compose.yml fe-monitor
-
-# 查看服务状态
-docker service ls
-```
-
-### 使用 Kubernetes
-
-可以使用 `kompose` 工具将 docker-compose 转换为 Kubernetes 配置：
-
-```bash
-# 安装 kompose
-curl -L https://github.com/kubernetes/kompose/releases/download/v1.26.0/kompose-linux-amd64 -o kompose
-chmod +x kompose
-
-# 转换配置
-./kompose convert -f docker-compose.yml
-```
+1. 确认卷挂载配置正确
+2. 检查文件权限
+3. 重启开发容器

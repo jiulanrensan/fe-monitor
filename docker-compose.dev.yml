@@ -1,10 +1,11 @@
 services:
   # 写服务 - 开发环境
-  write-service:
+  write-service-dev:
     build:
       context: .
       dockerfile: packages/server/micro-service-write/Dockerfile
       target: builder
+    platform: linux/amd64
     container_name: micro-service-write-dev
     ports:
       - '${WRITE_SERVICE_PORT:-3001}:3001'
@@ -16,19 +17,23 @@ services:
       - CLICKHOUSE_PASSWORD=${CLICKHOUSE_PASSWORD:-}
       - CLICKHOUSE_DB=${CLICKHOUSE_DB:-default}
     volumes:
-      - ./packages/server/micro-service-write:/app/micro-service-write
+      - ./packages/server:/app/packages/server
+      - ./packages/shared:/app/packages/shared
       - /app/node_modules
+      - /app/packages/server/node_modules
+      - /app/packages/shared/node_modules
+    command: ['sh', '-c', 'cd packages/server && pnpm run dev:write-server']
     restart: unless-stopped
     networks:
       - app-network
-    command: ['pnpm', 'run', 'dev:write-server']
 
   # 读服务 - 开发环境
-  read-service:
+  read-service-dev:
     build:
       context: .
       dockerfile: packages/server/micro-service-read/Dockerfile
       target: builder
+    platform: linux/amd64
     container_name: micro-service-read-dev
     ports:
       - '${READ_SERVICE_PORT:-3000}:3000'
@@ -40,12 +45,15 @@ services:
       - CLICKHOUSE_PASSWORD=${CLICKHOUSE_PASSWORD:-}
       - CLICKHOUSE_DB=${CLICKHOUSE_DB:-default}
     volumes:
-      - ./packages/server/micro-service-read:/app/micro-service-read
+      - ./packages/server:/app/packages/server
+      - ./packages/shared:/app/packages/shared
       - /app/node_modules
+      - /app/packages/server/node_modules
+      - /app/packages/shared/node_modules
+    command: ['sh', '-c', 'cd packages/server && pnpm run dev:read-server']
     restart: unless-stopped
     networks:
       - app-network
-    command: ['pnpm', 'run', 'dev:read-server']
 
 networks:
   app-network:
