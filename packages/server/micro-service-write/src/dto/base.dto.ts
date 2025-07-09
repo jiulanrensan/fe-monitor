@@ -6,6 +6,10 @@ import { API_SUB_TYPE, MONITOR_TYPE } from 'shared/src'
  */
 export class BaseDto {
   @IsString()
+  @IsNotEmpty({ message: '项目ID不能为空' })
+  pid: string
+
+  @IsString()
   @IsNotEmpty({ message: '应用ID不能为空' })
   aid: string
 

@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # 写服务 - 开发环境
   write-service:
@@ -23,7 +21,7 @@ services:
     restart: unless-stopped
     networks:
       - app-network
-    command: ['pnpm', 'run', 'dev:write']
+    command: ['pnpm', 'run', 'dev:write-server']
 
   # 读服务 - 开发环境
   read-service:
@@ -47,7 +45,7 @@ services:
     restart: unless-stopped
     networks:
       - app-network
-    command: ['pnpm', 'run', 'dev:read']
+    command: ['pnpm', 'run', 'dev:read-server']
 
 networks:
   app-network:

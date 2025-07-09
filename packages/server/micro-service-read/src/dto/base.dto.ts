@@ -5,6 +5,10 @@ import { IsString, IsNumber, IsOptional, IsNotEmpty } from 'class-validator'
  */
 export class BaseDto {
   @IsString()
+  @IsNotEmpty({ message: '项目ID不能为空' })
+  pid: string
+
+  @IsString()
   @IsNotEmpty({ message: '应用ID不能为空' })
   aid: string
 
