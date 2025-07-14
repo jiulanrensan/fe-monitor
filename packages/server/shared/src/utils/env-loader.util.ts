@@ -30,8 +30,10 @@ export class EnvLoader {
 
     // 尝试多个可能的配置文件路径
     const possiblePaths = [
+      path.resolve(__dirname, '../../../config', `${environment}.env`)
+      // path.resolve(__dirname, '../config', `${environment}.env`),
       // 相对于当前工作目录
-      path.resolve(process.cwd(), 'config', `${environment}.env`)
+      // path.resolve(process.cwd(), 'config', `${environment}.env`)
       // 微服务目录下的配置
       // path.resolve(process.cwd(), '..', 'config', `${environment}.env`)
     ]
@@ -70,14 +72,14 @@ export class EnvLoader {
    * 设置默认环境变量
    */
   private setDefaults(): void {
-    // console.log('setDefaults', process.env.CLICKHOUSE_HOST)
-    // console.log('setDefaults', process.env.CLICKHOUSE_PORT)
-    // console.log('setDefaults', process.env.CLICKHOUSE_USER)
-    // console.log('setDefaults', process.env.CLICKHOUSE_PASSWORD)
-    // console.log('setDefaults', process.env.CLICKHOUSE_DB)
-    // console.log('setDefaults', process.env.READ_SERVICE_PORT)
-    // console.log('setDefaults', process.env.WRITE_SERVICE_PORT)
-    // console.log('setDefaults', process.env.NODE_ENV)
+    console.log('setDefaults', process.env.CLICKHOUSE_HOST)
+    console.log('setDefaults', process.env.CLICKHOUSE_PORT)
+    console.log('setDefaults', process.env.CLICKHOUSE_USER)
+    console.log('setDefaults', process.env.CLICKHOUSE_PASSWORD)
+    console.log('setDefaults', process.env.CLICKHOUSE_DB)
+    console.log('setDefaults', process.env.READ_SERVICE_PORT)
+    console.log('setDefaults', process.env.WRITE_SERVICE_PORT)
+    console.log('setDefaults', process.env.NODE_ENV)
 
     // ClickHouse 默认配置
     process.env.CLICKHOUSE_HOST = process.env.CLICKHOUSE_HOST || 'http://127.0.0.1'

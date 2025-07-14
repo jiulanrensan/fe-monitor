@@ -13,9 +13,9 @@ function copyConfig() {
   const distDir = path.resolve(__dirname, '../dist');
   const distConfigDir = path.resolve(distDir, 'config');
 
-  console.log('Copying config files...');
-  console.log('Source:', configDir);
-  console.log('Destination:', distConfigDir);
+  // console.log('Copying config files...');
+  // console.log('Source:', configDir);
+  // console.log('Destination:', distConfigDir);
 
   try {
     // 检查源目录是否存在
@@ -49,8 +49,4 @@ function copyConfig() {
 }
 
 // 如果直接运行此脚本
-if (import.meta.url === `file://${process.argv[1]}`) {
-  copyConfig();
-}
-
-export { copyConfig }; 
+copyConfig();
