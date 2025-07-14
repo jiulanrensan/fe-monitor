@@ -1,10 +1,10 @@
 import { NestFactory } from '@nestjs/core'
 import { AppModule } from './app.module'
 import { Logger, ValidationPipe } from '@nestjs/common'
-import * as dotenv from 'dotenv'
+import { envLoader } from '../../shared/src/utils/env-loader.util'
 
-// 加载环境变量
-dotenv.config({ path: '.env' })
+// 加载环境配置
+envLoader.load()
 
 async function bootstrap() {
   const logger = new Logger('Bootstrap')

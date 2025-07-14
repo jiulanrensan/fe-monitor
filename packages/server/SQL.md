@@ -59,7 +59,7 @@ CREATE TABLE fre_monitor_db.api__duration
 ENGINE = MergeTree()
 PARTITION BY toYYYYMMDD(report_time)
 ORDER BY (report_time, pid, aid)
-TTL report_time + INTERVAL 3 DAY
+TTL toDate(report_time) + INTERVAL 3 DAY
 SETTINGS index_granularity = 8192;
 ```
 
@@ -89,7 +89,7 @@ CREATE TABLE fre_monitor_db.api__body_size
 ENGINE = MergeTree()
 PARTITION BY toYYYYMMDD(report_time)
 ORDER BY (report_time, pid, aid)
-TTL report_time + INTERVAL 3 DAY
+TTL toDate(report_time) + INTERVAL 3 DAY
 SETTINGS index_granularity = 8192;
 ```
 
@@ -118,7 +118,7 @@ CREATE TABLE fre_monitor_db.api__error_http_code
 ENGINE = MergeTree()
 PARTITION BY toYYYYMMDD(report_time)
 ORDER BY (report_time, pid, aid)
-TTL report_time + INTERVAL 3 DAY
+TTL toDate(report_time) + INTERVAL 3 DAY
 SETTINGS index_granularity = 8192;
 ```
 
@@ -148,7 +148,7 @@ CREATE TABLE fre_monitor_db.api__error_business_code
 ENGINE = MergeTree()
 PARTITION BY toYYYYMMDD(report_time)
 ORDER BY (report_time, pid, aid)
-TTL report_time + INTERVAL 3 DAY
+TTL toDate(report_time) + INTERVAL 3 DAY
 SETTINGS index_granularity = 8192;
 ```
 
@@ -173,7 +173,7 @@ CREATE TABLE fre_monitor_db.fre_log
 ENGINE = MergeTree()
 PARTITION BY toYYYYMMDD(report_time)
 ORDER BY (report_time, pid, aid)
-TTL report_time + INTERVAL 3 DAY
+TTL toDate(report_time) + INTERVAL 3 DAY
 SETTINGS index_granularity = 8192;
 ```
 

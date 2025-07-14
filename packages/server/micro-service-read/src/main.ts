@@ -2,14 +2,12 @@ import { NestFactory } from '@nestjs/core'
 import { AppModule } from './app.module'
 import { Logger } from '@nestjs/common'
 import { ValidationPipe } from '@nestjs/common'
-import * as dotenv from 'dotenv'
+import { envLoader } from '../../shared/src/utils/env-loader.util'
 
 /**
- * 加载环境变量
- * 注意：启动时的pwd为micro-service-read根目录，.env文件在micro-service-read外
- * 而不是当前文件与.env文件的路径关系
+ * 加载环境配置
  */
-dotenv.config({ path: './.env' })
+envLoader.load()
 
 async function bootstrap() {
   const logger = new Logger('Bootstrap')

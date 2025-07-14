@@ -9,7 +9,13 @@
             "sourceRoot": "micro-service-read/src",
             "compilerOptions": {
                 "deleteOutDir": true
-            }
+            },
+            "assets": [
+                {
+                    "include": "../config/**/*",
+                    "outDir": "dist/config"
+                }
+            ]
         },
         "micro-service-write": {
             "type": "application",
@@ -18,7 +24,13 @@
             "sourceRoot": "micro-service-write/src",
             "compilerOptions": {
                 "deleteOutDir": true
-            }
+            },
+            "assets": [
+                {
+                    "include": "../config/**/*",
+                    "outDir": "dist/config"
+                }
+            ]
         }
     }
 }
