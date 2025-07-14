@@ -1,6 +1,10 @@
 import { WX_API_HOOKS } from './const'
-import { getRoute } from './utils'
-
+function getRoute() {
+  if (!getCurrentPages) return ''
+  const pages = getCurrentPages()
+  const currentPage = pages[pages.length - 1]
+  return currentPage.route
+}
 function overrideComplete({ options, res, start }) {
   const { statusCode, profile, data } = res
   const end = new Date().getTime()
