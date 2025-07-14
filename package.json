@@ -1,5 +1,5 @@
 {
-  "name": "miniprogram-remote-devtools",
+  "name": "fe-monitor",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -18,8 +18,8 @@
     "dev:write-server:production": "cd packages/server && cross-env NODE_ENV=production nest start micro-service-write --watch",
     "dev:read-server:production": "cd packages/server && cross-env NODE_ENV=production nest start micro-service-read --watch",
     "dev:servers:production": "concurrently \"pnpm run dev:write-server:production\" \"pnpm run dev:read-server:production\"",
-    "build:write-server": "cd packages/server && nest build micro-service-write && node scripts/copy-config.js",
-    "build:read-server": "cd packages/server && nest build micro-service-read && node scripts/copy-config.js",
+    "build:write-server": "cd packages/server && nest build micro-service-write && node scripts/copy-config.mjs",
+    "build:read-server": "cd packages/server && nest build micro-service-read && node scripts/copy-config.mjs",
     "build:servers": "pnpm run build:write-server && pnpm run build:read-server",
     "start:write-server:dev": "cd packages/server/dist/micro-service-write/src && cross-env NODE_ENV=development node main.js",
     "start:read-server:dev": "cd packages/server/dist/micro-service-read/src && cross-env NODE_ENV=development node main.js",
