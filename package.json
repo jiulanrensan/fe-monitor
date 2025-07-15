@@ -44,7 +44,7 @@
     "docker:dev:logs": "docker-compose -f docker-compose.dev.yml logs -f",
     "prepare": "husky",
     "lint:lint-staged": "lint-staged",
-    "sdk-clean": "rimraf -rf packages/wechat-sdk/dist/",
+    "sdk-clean": "rimraf -rf packages/sdk/dist/",
     "sdk-build": "pnpm run sdk-clean && cross-env NODE_ENV=production rollup --config rollup.config.js",
     "sdk-watch": "pnpm run sdk-clean && cross-env NODE_ENV=development rollup --config rollup.config.js --watch"
   },

@@ -198,9 +198,9 @@ importers:
       '@dcloudio/uni-quickapp-webview':
         specifier: 3.0.0-4030620241128001
         version: 3.0.0-4030620241128001(postcss@8.5.6)(rollup@4.44.1)(ts-node@10.9.2(@swc/core@1.12.9)(@types/node@22.15.34)(typescript@4.9.5))(vue@3.5.17(typescript@4.9.5))
-      '@fe-monitor/wechat-sdk':
+      '@fe-monitor/sdk':
         specifier: workspace:^1.0.0
-        version: link:../wechat-sdk
+        version: link:../sdk
       vue:
         specifier: ^3.4.21
         version: 3.5.17(typescript@4.9.5)
@@ -239,15 +239,15 @@ importers:
         specifier: ^1.0.24
         version: 1.8.27(typescript@4.9.5)
 
-  packages/server: {}
-
-  packages/shared: {}
-
-  packages/wechat-sdk:
+  packages/sdk:
     dependencies:
       '@fe-monitor/shared':
         specifier: workspace:^1.0.0
         version: link:../shared
+
+  packages/server: {}
+
+  packages/shared: {}
 
 packages:
 

@@ -4,7 +4,7 @@ import typescript from "rollup-plugin-typescript2";
 /**
  * 需要打包的package
  */
-const packageList = [ 'common', 'wechat-sdk' ]
+const packageList = [ 'common', 'sdk' ]
 
 function isProd() {
   return process.env.NODE_ENV === 'production'

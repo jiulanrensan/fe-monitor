@@ -15,7 +15,7 @@
     "type-check": "vue-tsc --noEmit"
   },
   "dependencies": {
-    "@fe-monitor/wechat-sdk": "workspace:^1.0.0",
+    "@fe-monitor/sdk": "workspace:^1.0.0",
     "@dcloudio/uni-app": "3.0.0-4030620241128001",
     "@dcloudio/uni-app-harmony": "3.0.0-4030620241128001",
     "@dcloudio/uni-app-plus": "3.0.0-4030620241128001",
