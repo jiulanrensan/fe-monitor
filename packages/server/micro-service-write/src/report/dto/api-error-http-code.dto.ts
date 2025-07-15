@@ -9,5 +9,5 @@ import { API_ERROR_HTTP_CODE_TABLE } from '../../../../shared/src'
 @ClickHouseTable(API_ERROR_HTTP_CODE_TABLE)
 export class ApiErrorHttpCodeReportDto extends APIDto {
   @IsString()
-  error_reason: string
+  errorReason: string
 }
