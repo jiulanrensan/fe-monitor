@@ -31,6 +31,9 @@ export class BaseDto {
   @IsString({ message: '' })
   model: string
 
+  @IsString({ message: '' })
+  platform: string
+
   @IsEnum(MONITOR_TYPE, { message: '类型错误' })
   type: MONITOR_TYPE
 
