@@ -29,12 +29,12 @@ export class ReportService {
    * @param tableName 可选的表名，如果不提供则从装饰器获取
    * @param methodName 方法名称，用于日志记录
    */
-  private async report<T extends Record<string, any>>(
+  private report<T extends Record<string, any>>(
     data: any,
     dtoClass: new (...args: any[]) => T,
     tableName?: string,
     methodName?: string
-  ): Promise<void> {
+  ) {
     const className = dtoClass.name
     const logMethodName = methodName || className
 
@@ -58,7 +58,7 @@ export class ReportService {
   /**
    * 上报API耗时数据
    */
-  async reportApiDuration(data: any): Promise<void> {
+  reportApiDuration(data: any): void {
     // this.logger.log(`reportApiDuration: ${JSON.stringify(data)}`)
     return this.report(data, ApiDurationReportDto)
   }
@@ -66,21 +66,21 @@ export class ReportService {
   /**
    * 上报API业务错误数据
    */
-  async reportApiErrorBusinessCode(data: any): Promise<void> {
+  reportApiErrorBusinessCode(data: any): void {
     return this.report(data, ApiErrorBusinessCodeReportDto)
   }
 
   /**
    * 上报API HTTP错误数据
    */
-  async reportApiErrorHttpCode(data: any): Promise<void> {
+  reportApiErrorHttpCode(data: any): void {
     return this.report(data, ApiErrorHttpCodeReportDto)
   }
 
   /**
    * 上报API Body大小数据
    */
-  async reportApiBodySize(data: any): Promise<void> {
+  reportApiBodySize(data: any): void {
     return this.report(data, ApiBodySizeReportDto)
   }
 
@@ -88,7 +88,7 @@ export class ReportService {
    * todo 待开发
    * 上报性能监控数据
    */
-  async reportPerformance(data: any): Promise<void> {
+  reportPerformance(data: any): void {
     return this.report(data, PerformanceDto, 'performance_metrics', 'PerformanceDto')
   }
 
@@ -96,11 +96,11 @@ export class ReportService {
    * todo 待开发
    * 上报错误监控数据
    */
-  async reportError(data: any): Promise<void> {
+  reportError(data: any): void {
     return this.report(data, ErrorDto, 'error_logs', 'ErrorDto')
   }
 
-  async reportFreLog(data: any): Promise<void> {
+  reportFreLog(data: any): void {
     return this.report(data, FreLogReportDto)
   }
 }

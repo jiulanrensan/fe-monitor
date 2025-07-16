@@ -1,10 +1,9 @@
-import { IsString, IsNumber, IsOptional, IsNotEmpty, IsEnum, isEnum } from 'class-validator'
-import { API_SUB_TYPE, MONITOR_TYPE } from 'shared/src'
+import { IsString, IsNumber, IsOptional, IsNotEmpty, IsEnum } from 'class-validator'
 
 /**
  * 基本 DTO 类
  */
-export class BaseDto {
+export class CommonDto {
   @IsString()
   @IsNotEmpty({ message: '项目ID不能为空' })
   pid: string
@@ -33,11 +32,4 @@ export class BaseDto {
 
   @IsString({ message: '' })
   platform: string
-
-  @IsEnum(MONITOR_TYPE, { message: '类型错误' })
-  type: MONITOR_TYPE
-
-  @IsOptional()
-  @IsEnum(API_SUB_TYPE, { message: '类型错误' })
-  subType?: API_SUB_TYPE
 }

@@ -9,17 +9,17 @@ import {
   ApiErrorHttpCodeReportDto,
   ApiBodySizeReportDto
 } from './dto'
-import { BaseDto } from '../dto'
 import { MONITOR_TYPE, API_SUB_TYPE } from '../../../shared/src'
 import { validate } from 'class-validator'
 import { FreLogReportDto } from './dto/fre-log.dto'
+import { ReportDto } from './dto/base.dto'
 
 /**
  * 策略接口
  */
 interface ReportStrategy {
   validate(data: any): Promise<boolean>
-  handle(data: any): Promise<any>
+  handle(data: any): void
 }
 
 /**
@@ -28,7 +28,7 @@ interface ReportStrategy {
 interface SubTypeConfig {
   name: string
   dtoClass: any
-  serviceMethod: (data: any) => Promise<void>
+  serviceMethod: (data: any) => void
 }
 
 /**
@@ -97,24 +97,24 @@ abstract class BaseReportStrategy<T> implements ReportStrategy {
     }
   }
 
-  async handle(data: any): Promise<any> {
+  handle(data: any): void {
     // 检查是否支持子类型
     const subTypeConfig = this.detectSubType(data)
 
     if (subTypeConfig) {
       // 使用子类型进行处理
-      return this.handleWithSubType(data, subTypeConfig)
+      this.handleWithSubType(data, subTypeConfig)
     } else {
       // 使用基础类型进行处理
-      return this.handleWithBaseType(data)
+      this.handleWithBaseType(data)
     }
   }
 
-  private async handleWithSubType(data: any, subTypeConfig: SubTypeConfig): Promise<void> {
-    await subTypeConfig.serviceMethod.call(this.reportService, data)
+  private handleWithSubType(data: any, subTypeConfig: SubTypeConfig): void {
+    subTypeConfig.serviceMethod.call(this.reportService, data)
   }
 
-  protected async handleWithBaseType(data: any): Promise<void> {
+  protected handleWithBaseType(data: any): void {
     // 子类可以重写此方法
     throw new Error(`${this.getStrategyName()} 需要实现 handleWithBaseType 方法或提供子类型配置`)
   }
@@ -161,27 +161,49 @@ export class ReportController {
    * 上报监控数据
    */
   @Post()
-  async report(@Body() data: BaseDto) {
+  async report(@Body() data: ReportDto) {
+    // 立即返回成功响应
+    const response = SUCCESS_RESPONSE
+
+    // 异步处理数据，不等待结果
+    this.processDataAsync(data).catch((error) => {
+      this.logger.error(`异步处理监控数据失败: ${error.message}`, error.stack)
+    })
+
+    return response
+  }
+
+  /**
+   * 异步处理监控数据
+   */
+  private async processDataAsync(data: ReportDto): Promise<void> {
     try {
-      //   this.logger.log(`report: ${JSON.stringify(data)}`)
-      const strategy = this.strategies.get(data.type)
+      // 遍历 data.list，将每个元素与 data 的其他字段合并
+      const { list, ...rest } = data
+      for (const item of list) {
+        // 合并数据：将 data 的其他字段与 list 中的每个元素合并
+        const mergedData = {
+          ...rest,
+          ...item
+        }
 
-      if (!strategy) {
-        this.logger.error(`不支持的监控类型: ${data.type}`)
-        return SUCCESS_RESPONSE
+        const strategy = this.strategies.get(mergedData.type)
+
+        if (!strategy) {
+          this.logger.error(`不支持的监控类型: ${mergedData.type}`)
+          continue
+        }
+
+        // 执行校验
+        if (!(await strategy.validate(mergedData))) {
+          continue
+        }
+        // 执行处理
+        strategy.handle(mergedData)
       }
-
-      // 执行校验
-      if (!(await strategy.validate(data))) {
-        return SUCCESS_RESPONSE
-      }
-      // 执行处理
-      await strategy.handle(data)
-
-      return SUCCESS_RESPONSE
     } catch (error) {
-      this.logger.error(`上报监控数据失败: ${error.message}`, error.stack)
-      return SUCCESS_RESPONSE
+      this.logger.error(`处理监控数据失败: ${error.message}`, error.stack)
+      throw error
     }
   }
 }
@@ -253,8 +275,8 @@ class PerformanceReportStrategy extends BaseReportStrategy<PerformanceDto> {
     return null
   }
 
-  protected async handleWithBaseType(data: any): Promise<void> {
-    await this.reportService.reportPerformance(data as PerformanceDto)
+  protected handleWithBaseType(data: any): void {
+    this.reportService.reportPerformance(data as PerformanceDto)
   }
 
   getStrategyName(): string {
@@ -276,8 +298,8 @@ class ErrorReportStrategy extends BaseReportStrategy<ErrorDto> {
     return null
   }
 
-  protected async handleWithBaseType(data: any): Promise<void> {
-    await this.reportService.reportError(data as ErrorDto)
+  protected handleWithBaseType(data: any): void {
+    this.reportService.reportError(data as ErrorDto)
   }
 
   getStrategyName(): string {
@@ -294,8 +316,8 @@ class FreLogReportStrategy extends BaseReportStrategy<FreLogReportDto> {
     // 没有子类型
     return null
   }
-  protected async handleWithBaseType(data: any): Promise<void> {
-    await this.reportService.reportFreLog(data as FreLogReportDto)
+  protected handleWithBaseType(data: any): void {
+    this.reportService.reportFreLog(data as FreLogReportDto)
   }
 
   getStrategyName(): string {

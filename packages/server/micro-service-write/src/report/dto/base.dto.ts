@@ -1,6 +1,43 @@
-import { IsString, IsOptional, IsNumber, IsNotEmpty, IsDateString } from 'class-validator'
-import { BaseDto } from '../../dto'
+import {
+  IsString,
+  IsOptional,
+  IsNumber,
+  IsNotEmpty,
+  IsDateString,
+  ValidateNested,
+  IsArray,
+  IsEnum
+} from 'class-validator'
+import { CommonDto } from '../../dto'
+import { Type } from 'class-transformer'
+import { API_SUB_TYPE, MONITOR_TYPE } from 'shared/src'
 
+class ReportCommonDto {
+  @IsEnum(MONITOR_TYPE, { message: '类型错误' })
+  type: MONITOR_TYPE
+
+  @IsOptional()
+  @IsEnum(API_SUB_TYPE, { message: '类型错误' })
+  subType?: API_SUB_TYPE
+}
+/**
+ * 上报数据 DTO
+ */
+export class ReportDto extends CommonDto {
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => ReportCommonDto)
+  list: ReportCommonDto[]
+}
+
+export class BaseDto extends CommonDto {
+  @IsEnum(MONITOR_TYPE, { message: '类型错误' })
+  type: MONITOR_TYPE
+
+  @IsOptional()
+  @IsEnum(API_SUB_TYPE, { message: '类型错误' })
+  subType?: API_SUB_TYPE
+}
 /**
  * API 相关字段 DTO
  */
