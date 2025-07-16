@@ -149,11 +149,11 @@ export abstract class Core<Options extends BaseOptionsType> {
   abstract initClient(): Promise<void>
 
   /**
-   * 抽象方法，用于转换数据
+   * 抽象方法，用于添加、修改数据
    * @param data 原始数据
    * @returns 转换后的数据
    */
-  abstract transform(data: BreadcrumbPushData): BreadcrumbPushData
+  abstract transform(data: IAnyObject): IAnyObject
   /**
    * 抽象方法，调用接口发送数据，按分组发送
    * @param fn 事件函数

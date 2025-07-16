@@ -1,4 +1,4 @@
-import { BreadcrumbPushData, IAnyObject } from '@/core/type'
+import { BreadcrumbPushData, IAnyObject, ReportData } from '@/core/type'
 import { Core } from '../core'
 import { WXOptionsType } from './type'
 import requestPlugin from './plugins/requestPlugin'
@@ -17,7 +17,7 @@ export class WXCore extends Core<WXOptionsType> {
     const { uid } = this.getOptions()
     this.regenerateSessionId({ uid: uid || 'anonymous', deviceInfo: this.wxSettings })
   }
-  transform(data: IAnyObject): any {
+  transform(data: ReportData): any {
     if (!data) return data
     const { brand, model, platform } = this.wxSettings
     const { pid, aid, sid, uid } = this.getOptions()
@@ -35,7 +35,7 @@ export class WXCore extends Core<WXOptionsType> {
   }
   async send(data: BreadcrumbPushData[]) {
     const { report, host, reqOption, timeout } = this.getOptions()
-    const reportData = this.transform(data)
+    const reportData = this.transform({ list: data })
     return new Promise((resolve, reject) => {
       const options = typeof reqOption === 'function' ? reqOption(resolve, reject) : {}
       wx.request({

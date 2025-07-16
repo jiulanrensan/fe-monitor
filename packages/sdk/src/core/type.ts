@@ -45,6 +45,14 @@ export type BaseOptionsType = {
 
 export type IAnyObject = Record<string, any>
 
+/**
+ * 上报数据结构
+ */
+export type ReportData = {
+  list: BreadcrumbPushData[]
+  [x: string]: any
+}
+
 export type NotifyFunc = (data: any, type?: CALLBACK_TYPE) => void
 export interface BasePluginType {
   /** 插件名称 */
