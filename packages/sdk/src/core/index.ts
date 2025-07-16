@@ -56,7 +56,7 @@ export abstract class Core<Options extends BaseOptionsType> {
 
   /**
    * 重新生成会话ID
-   * 可用于用户切换或需要重新开始会话的场景
+   * 可用于用户登录状态变化
    */
   regenerateSessionId({ uid, deviceInfo }: { uid: string; deviceInfo: IAnyObject }): void {
     this.generateSessionId({ uid, deviceInfo })

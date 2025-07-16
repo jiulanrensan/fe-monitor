@@ -15,16 +15,13 @@ function onAppHidePlugin(): BasePluginType {
     name: 'onAppHidePlugin',
     monitor(notify) {
       handleOnAppHide({ notify })
-    },
-    transform(data: any) {
-      // 可以在这里对数据进行进一步处理
-      return {
-        ...data,
-        // 添加额外的应用隐藏相关信息
-        appState: 'hidden',
-        hideTime: new Date().toISOString()
-      }
     }
+    // transform(data: any) {
+    //   // 可以在这里对数据进行进一步处理
+    //   return {
+    //     ...data,
+    //   }
+    // }
   }
 }
 

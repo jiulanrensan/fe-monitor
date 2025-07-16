@@ -28,8 +28,8 @@ export class WXCore extends Core<WXOptionsType> {
       platform,
       pid,
       aid,
-      sid,
-      uid
+      sid: sid || '',
+      uid: uid || 'anonymous'
     }
     return this.addReportInfo(reportData)
   }
