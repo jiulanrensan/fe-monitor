@@ -171,7 +171,7 @@ export class Breadcrumb<O extends BaseOptionsType> {
 
   constructor(options: Partial<O> = {}) {
     this.maxBreadcrumbs = options.maxBreadcrumbs || 10
-    this.storageKey = 'fe_monitor'
+    this.storageKey = 'FE_MONITOR'
     this.storage = StorageFactory.createStorage()
     this.groupedStack = {}
     this.initStorage()
@@ -197,9 +197,13 @@ export class Breadcrumb<O extends BaseOptionsType> {
    * @returns 解析后的类型和子类型
    */
   private parseGroupKey(groupKey: string): { type: string; subType?: string } {
-    const parts = groupKey.split('_')
-    const type = parts[0]
-    const subType = parts.length > 1 ? parts[1] : undefined
+    const firstUnderscoreIndex = groupKey.indexOf('_')
+    if (firstUnderscoreIndex === -1) {
+      return { type: groupKey }
+    }
+
+    const type = groupKey.substring(0, firstUnderscoreIndex)
+    const subType = groupKey.substring(firstUnderscoreIndex + 1)
     return { type, subType }
   }
 

@@ -86,12 +86,11 @@ export abstract class Core<Options extends BaseOptionsType> {
       }
       const callback = (data: any, type?: CALLBACK_TYPE) => {
         const pushData = typeof transform === 'function' ? transform.apply(this, [data]) : data
-        const datas = this.transform(pushData)
 
         // 使用策略模式处理不同的回调类型
         // 未准备就绪，走缓存策略
-        const strategyType = this.isReady ? CALLBACK_TYPE.FLUSH : type || CALLBACK_TYPE.CACHE
-        this.callbackStrategyManager.execute(strategyType, this, datas)
+        const strategyType = this.isReady ? type || CALLBACK_TYPE.CACHE : CALLBACK_TYPE.CACHE
+        this.callbackStrategyManager.execute(strategyType, this, pushData)
       }
       sub.watch(name, callback)
     }
