@@ -1,5 +1,4 @@
 dist
-sdk
 node_modules
 example
 commitlint.config.js
