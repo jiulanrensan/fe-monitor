@@ -3,6 +3,7 @@ import { Core } from '../core'
 import { WXOptionsType } from './type'
 import requestPlugin from './plugins/requestPlugin'
 import onAppHidePlugin from './plugins/onAppHidePlugin'
+import logPlugin, { reportLog } from './plugins/logPlugin'
 
 export class WXCore extends Core<WXOptionsType> {
   private wxSettings: IAnyObject = {}
@@ -66,7 +67,11 @@ export class WXCore extends Core<WXOptionsType> {
 const init = (options: WXOptionsType) => {
   const client = new WXCore(options)
   const { plugins = [] } = options
-  client.use([requestPlugin(), onAppHidePlugin(), ...plugins])
+  client.use([requestPlugin(), onAppHidePlugin(), logPlugin(), ...plugins])
+  return {
+    regenerateSessionId: client.regenerateSessionId.bind(client),
+    reportLog
+  }
 }
 
 export default init
