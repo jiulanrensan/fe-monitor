@@ -83,7 +83,7 @@ export class QueryService {
   async apiDurationCount(
     timeRange: { start: string; end: string },
     duration: number,
-    aid: string,
+    pid: string,
     threshold: number
   ): Promise<{ data: ApiDurationResponseDto[]; stats: any }> {
     // 构建查询条件
@@ -91,21 +91,21 @@ export class QueryService {
       `report_time >= '${timeRange.start}'`,
       `report_time <= '${timeRange.end}'`,
       `duration >= ${duration}`,
-      `aid = '${aid}'`
+      `pid = '${pid}'`
     ]
 
     const whereClause = conditions.join(' AND ')
     const query = `
       SELECT url, count() AS count,
-      quantileTDigest(0.50)(duration) AS median_duration,
-      quantileTDigest(0.95)(duration) AS p95_duration,
-      quantileTDigest(0.99)(duration) AS p99_duration
+      quantileTDigest(0.50)(duration) AS median,
+      quantileTDigest(0.95)(duration) AS p95,
+      quantileTDigest(0.99)(duration) AS p99
       FROM ${API_DURATION_TABLE} WHERE ${whereClause} GROUP BY url HAVING count >= ${threshold}`
 
     this.logger.log(`Executing count query: ${query}`)
 
     const result = await this.clickHouseService.query<ApiDurationResponseDto>(query)
-    this.logger.log(`Query result: ${JSON.stringify(result)}`)
+    this.logger.log(`apiDurationCount Query result: ${JSON.stringify(result)}`)
     return result
   }
 
@@ -114,7 +114,7 @@ export class QueryService {
    */
   async apiBodySizeCount(
     timeRange: { start: string; end: string },
-    aid: string,
+    pid: string,
     reqBodySize: number,
     resBodySize: number,
     threshold: number
@@ -123,7 +123,7 @@ export class QueryService {
     const conditions = [
       `report_time >= '${timeRange.start}'`,
       `report_time <= '${timeRange.end}'`,
-      `aid = '${aid}'`,
+      `pid = '${pid}'`,
       `(req_body_size >= ${reqBodySize} OR res_body_size >= ${resBodySize})`
     ]
 
@@ -136,7 +136,7 @@ export class QueryService {
     this.logger.log(`Executing body size count query: ${query}`)
 
     const result = await this.clickHouseService.query<ApiBodySizeResponseDto>(query)
-    this.logger.log(`Query result: ${JSON.stringify(result)}`)
+    this.logger.log(`apiBodySizeCount Query result: ${JSON.stringify(result)}`)
     return result
   }
 
@@ -145,7 +145,7 @@ export class QueryService {
    */
   async apiErrorHttpCodeCount(
     timeRange: { start: string; end: string },
-    aid: string,
+    pid: string,
     statusCode: number,
     useGreaterEqual: boolean = true,
     threshold: number
@@ -154,17 +154,17 @@ export class QueryService {
     const conditions = [
       `report_time >= '${timeRange.start}'`,
       `report_time <= '${timeRange.end}'`,
-      `aid = '${aid}'`,
+      `pid = '${pid}'`,
       useGreaterEqual ? `status_code >= ${statusCode}` : `status_code = ${statusCode}`
     ]
 
     const whereClause = conditions.join(' AND ')
-    const query = `SELECT url, count() AS count FROM ${API_ERROR_HTTP_CODE_TABLE} WHERE ${whereClause} GROUP BY url HAVING count >= ${threshold}`
+    const query = `SELECT url, status_code, count() AS count FROM ${API_ERROR_HTTP_CODE_TABLE} WHERE ${whereClause} GROUP BY url, status_code HAVING count >= ${threshold}`
 
     this.logger.log(`Executing error http code count query: ${query}`)
 
     const result = await this.clickHouseService.query<ApiErrorHttpCodeResponseDto>(query)
-    this.logger.log(`Query result: ${JSON.stringify(result)}`)
+    this.logger.log(`apiErrorHttpCodeCount Query result: ${JSON.stringify(result)}`)
     return result
   }
 
@@ -173,7 +173,7 @@ export class QueryService {
    */
   async apiErrorBusinessCodeCount(
     timeRange: { start: string; end: string },
-    aid: string,
+    pid: string,
     errorCodes: number[],
     threshold: number
   ): Promise<{ data: ApiErrorBusinessCodeResponseDto[]; stats: any }> {
@@ -181,7 +181,7 @@ export class QueryService {
     const conditions = [
       `report_time >= '${timeRange.start}'`,
       `report_time <= '${timeRange.end}'`,
-      `aid = '${aid}'`
+      `pid = '${pid}'`
     ]
 
     // 如果提供了错误码数组，添加错误码条件
@@ -191,12 +191,12 @@ export class QueryService {
     }
 
     const whereClause = conditions.join(' AND ')
-    const query = `SELECT url, count() AS count FROM ${API_ERROR_BUSINESS_CODE_TABLE} WHERE ${whereClause} GROUP BY url HAVING count >= ${threshold}`
+    const query = `SELECT url, error_code, count() AS count FROM ${API_ERROR_BUSINESS_CODE_TABLE} WHERE ${whereClause} GROUP BY url, error_code HAVING count >= ${threshold}`
 
     this.logger.log(`Executing error business code count query: ${query}`)
 
     const result = await this.clickHouseService.query<ApiErrorBusinessCodeResponseDto>(query)
-    this.logger.log(`Query result: ${JSON.stringify(result)}`)
+    this.logger.log(`apiErrorBusinessCodeCount Query result: ${JSON.stringify(result)}`)
     return result
   }
 }
