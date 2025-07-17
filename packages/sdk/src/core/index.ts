@@ -18,6 +18,23 @@ export abstract class Core<Options extends BaseOptionsType> {
       this.isReady = true
     })
   }
+  /**
+   * 抽象方法，用于初始化客户端
+   */
+  abstract initClient(): Promise<void>
+
+  /**
+   * 抽象方法，用于添加、修改数据
+   * @param data 原始数据
+   * @returns 转换后的数据
+   */
+  abstract transform(data: IAnyObject): IAnyObject
+  /**
+   * 抽象方法，调用接口发送数据，按分组发送
+   * @param fn 事件函数
+   * @param args 事件参数
+   */
+  abstract send(args: BreadcrumbPushData[]): Promise<any>
   private initOptions(options: Options) {
     const { host, report, pid, aid } = options
     if ([host, report, pid, aid].some((item) => !item)) {
@@ -54,6 +71,66 @@ export abstract class Core<Options extends BaseOptionsType> {
     }
   }
 
+  /**
+   * 添加数据到缓存队列
+   */
+  private async pushBreadcrumb(data: BreadcrumbPushData) {
+    // 添加数据到分组队列
+    await this.breadcrumb.push(data)
+
+    // 检查当前分组是否已满
+    const { type, subType } = data
+    if (this.breadcrumb.isGroupFull(type, subType)) {
+      // 获取该分组的所有数据
+      const groupData = this.breadcrumb.getStackByGroup(type, subType)
+      if (groupData.length === 0) return
+
+      // 直接发送该分组的数据
+      try {
+        await this.send(groupData)
+        // 发送成功后清空该分组
+        await this.breadcrumb.clearGroup(type, subType)
+      } catch (error) {
+        console.warn('Failed to send breadcrumb data:', error)
+        // 发送失败时更新重试次数并决定是否丢弃数据
+        await this.handleSendFailure(groupData, type, subType)
+      }
+    }
+  }
+  private addLogTime(data: BreadcrumbPushData) {
+    const logTime = new Date().getTime()
+    return { ...data, logTime }
+  }
+
+  /**
+   * 处理发送失败的情况
+   * @param groupData 分组数据
+   * @param typeOrGroupKey 数据类型或分组键
+   * @param subType 数据子类型（当第一个参数为type时使用）
+   */
+  private async handleSendFailure(
+    groupData: BreadcrumbPushData[],
+    typeOrGroupKey: string,
+    subType?: string
+  ): Promise<void> {
+    const maxRetryTimes = this.options.retryTimes || 3
+    const updatedData = groupData.map((data) => {
+      const currentRetryTimes = (data.retryTimes || 0) + 1
+      return { ...data, retryTimes: currentRetryTimes }
+    })
+
+    // 过滤出未超过最大重试次数的数据
+    const validData = updatedData.filter((data) => (data.retryTimes || 0) <= maxRetryTimes)
+
+    // 更新分组数据（只保留未超过重试次数的数据）
+    if (subType !== void 0) {
+      // 使用 type 和 subType 更新分组
+      await this.breadcrumb.updateGroupData(typeOrGroupKey, subType, validData)
+    } else {
+      // 使用分组键更新分组
+      await this.breadcrumb.updateGroupDataByKey(typeOrGroupKey, validData)
+    }
+  }
   /**
    * 重新生成会话ID
    * 可用于用户登录状态变化
@@ -99,67 +176,12 @@ export abstract class Core<Options extends BaseOptionsType> {
   getOptions() {
     return { ...this.options }
   }
-
-  /**
-   * 添加数据到缓存队列
-   */
-  async pushBreadcrumb(data: BreadcrumbPushData) {
-    // 添加数据到分组队列
-    await this.breadcrumb.push(data)
-
-    // 检查当前分组是否已满
-    const { type, subType } = data
-    if (this.breadcrumb.isGroupFull(type, subType)) {
-      // 获取该分组的所有数据
-      const groupData = this.breadcrumb.getStackByGroup(type, subType)
-      if (groupData.length === 0) return
-
-      // 直接发送该分组的数据
-      try {
-        await this.send(groupData)
-        // 发送成功后清空该分组
-        await this.breadcrumb.clearGroup(type, subType)
-      } catch (error) {
-        console.warn('Failed to send breadcrumb data:', error)
-        // 发送失败时更新重试次数并决定是否丢弃数据
-        await this.handleSendFailure(groupData, type, subType)
-      }
-    }
-  }
-  addLogTime(data: BreadcrumbPushData) {
-    const logTime = new Date().getTime()
-    return { ...data, logTime }
-  }
-  addReportInfo<T extends IAnyObject>(
-    reportData: T
-  ): T & { retryTimes: number; reportTime: number } {
+  addReportInfo<T extends IAnyObject>(reportData: T) {
     const reportTime = new Date().getTime()
-    const result = { ...reportData } as T & { retryTimes: number; reportTime: number }
-    if (result.retryTimes) {
-      result.retryTimes++
-    } else {
-      result.retryTimes = 1
-    }
+    const result = { ...reportData } as T & { reportTime: number }
     result.reportTime = reportTime
     return result
   }
-  /**
-   * 抽象方法，用于初始化客户端
-   */
-  abstract initClient(): Promise<void>
-
-  /**
-   * 抽象方法，用于添加、修改数据
-   * @param data 原始数据
-   * @returns 转换后的数据
-   */
-  abstract transform(data: IAnyObject): IAnyObject
-  /**
-   * 抽象方法，调用接口发送数据，按分组发送
-   * @param fn 事件函数
-   * @param args 事件参数
-   */
-  protected abstract send(args: BreadcrumbPushData[]): Promise<any>
   /**
    * 清空缓存队列
    */
@@ -188,46 +210,16 @@ export abstract class Core<Options extends BaseOptionsType> {
   }
 
   /**
-   * 处理发送失败的情况
-   * @param groupData 分组数据
-   * @param typeOrGroupKey 数据类型或分组键
-   * @param subType 数据子类型（当第一个参数为type时使用）
-   */
-  private async handleSendFailure(
-    groupData: BreadcrumbPushData[],
-    typeOrGroupKey: string,
-    subType?: string
-  ): Promise<void> {
-    const maxRetryTimes = this.options.retryTimes || 3
-    const updatedData = groupData.map((data) => {
-      const currentRetryTimes = (data.retryTimes || 0) + 1
-      return { ...data, retryTimes: currentRetryTimes }
-    })
-
-    // 过滤出未超过最大重试次数的数据
-    const validData = updatedData.filter((data) => (data.retryTimes || 0) <= maxRetryTimes)
-
-    // 更新分组数据（只保留未超过重试次数的数据）
-    if (subType !== void 0) {
-      // 使用 type 和 subType 更新分组
-      await this.breadcrumb.updateGroupData(typeOrGroupKey, subType, validData)
-    } else {
-      // 使用分组键更新分组
-      await this.breadcrumb.updateGroupDataByKey(typeOrGroupKey, validData)
-    }
-  }
-
-  /**
    * 立即上报数据
    */
   report(data: BreadcrumbPushData) {
-    return this.send([data])
+    return this.send([this.addLogTime(data)])
   }
   /**
    * 添加数据到缓存队列
    */
   addReport(data: BreadcrumbPushData) {
     // 将数据添加到缓存队列中
-    return this.pushBreadcrumb(data)
+    return this.pushBreadcrumb(this.addLogTime(data))
   }
 }
