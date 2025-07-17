@@ -9,7 +9,9 @@ export default {
     // 'api__error_http_code',
     // 'api__body_size',
     // 'fre_log',
-    table: 'fre_log', // 改这个
+    table: 'fre_log',
+    // tableList: ['api__duration', 'api__error_business_code', 'api__error_http_code', 'api__body_size', 'fre_log'],
+    tableList: ['api__error_business_code', 'api__error_http_code'],
     tableMap: {
         api__duration: 'api__duration',
         api__error_business_code: 'api__error_business_code',
