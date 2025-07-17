@@ -19,6 +19,13 @@ class ReportCommonDto {
   @IsOptional()
   @IsEnum(API_SUB_TYPE, { message: '类型错误' })
   subType?: API_SUB_TYPE
+
+  @IsNumber({}, { message: '' })
+  logTime: number
+
+  @IsOptional()
+  @IsNumber({}, { message: '' })
+  retryTimes?: number
 }
 /**
  * 上报数据 DTO
@@ -37,6 +44,9 @@ export class BaseDto extends CommonDto {
   @IsOptional()
   @IsEnum(API_SUB_TYPE, { message: '类型错误' })
   subType?: API_SUB_TYPE
+
+  @IsNumber({}, { message: '' })
+  logTime: number
 }
 /**
  * API 相关字段 DTO

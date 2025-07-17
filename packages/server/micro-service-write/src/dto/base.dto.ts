@@ -18,14 +18,8 @@ export class CommonDto {
   @IsString({ message: '' })
   uid: string
 
-  @IsString({ message: '' })
-  logTime: string
-
-  @IsString({ message: '' })
-  reportTime: string
-
   @IsNumber({}, { message: '' })
-  retryTimes: number
+  reportTime: number
 
   @IsString({ message: '' })
   model: string

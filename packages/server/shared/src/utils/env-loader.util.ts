@@ -30,12 +30,10 @@ export class EnvLoader {
 
     // 尝试多个可能的配置文件路径
     const possiblePaths = [
-      path.resolve(__dirname, '../../../config', `${environment}.env`)
-      // path.resolve(__dirname, '../config', `${environment}.env`),
-      // 相对于当前工作目录
-      // path.resolve(process.cwd(), 'config', `${environment}.env`)
-      // 微服务目录下的配置
-      // path.resolve(process.cwd(), '..', 'config', `${environment}.env`)
+      // 使用build，config 目录在 dist 目录下
+      path.resolve(__dirname, '../../../config', `${environment}.env`),
+      // 不使用build，config 目录在server目录下，即相对于当前工作目录
+      path.resolve(process.cwd(), 'config', `${environment}.env`)
     ]
 
     console.log(`Loading environment config: ${environment}`)
