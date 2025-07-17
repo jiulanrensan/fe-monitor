@@ -49,7 +49,20 @@ type ApiErrorBusinessCode = ApiReport & {
  */
 interface DataCollectorStrategy {
   shouldCollect(data: any): boolean
-  collect(data: any): any
+  collect(data: any): Promise<any>
+}
+
+async function getNetworkType(): Promise<string> {
+  return new Promise((resolve) => {
+    wx.getNetworkType({
+      success: (res) => {
+        resolve(res.networkType)
+      },
+      fail: () => {
+        resolve('unknown')
+      }
+    })
+  })
 }
 
 /**
@@ -62,7 +75,8 @@ class DurationCollector implements DataCollectorStrategy {
     return data.duration && data.duration > this.threshold
   }
 
-  collect(data: any): ApiDuration {
+  async collect(data: any): Promise<ApiDuration> {
+    const network = await getNetworkType()
     return {
       type: MONITOR_TYPE.API,
       subType: API_SUB_TYPE.DURATION,
@@ -72,7 +86,7 @@ class DurationCollector implements DataCollectorStrategy {
       duration: data.duration,
       reqPage: data.reqPage,
       resPage: data.resPage,
-      network: data.network,
+      network,
       queueTime: data.queueTime,
       queueStart: data.queueStart,
       queueEnd: data.queueEnd
@@ -96,7 +110,7 @@ class BodySizeCollector implements DataCollectorStrategy {
     )
   }
 
-  collect(data: any): ApiBodySize {
+  async collect(data: any): Promise<ApiBodySize> {
     return {
       type: MONITOR_TYPE.API,
       subType: API_SUB_TYPE.BODY_SIZE,
@@ -123,14 +137,14 @@ class HttpErrorCollector implements DataCollectorStrategy {
     return data.statusCode >= this.errorCodes
   }
 
-  collect(data: any): ApiErrorHttpCode {
+  async collect(data: any): Promise<ApiErrorHttpCode> {
     return {
       type: MONITOR_TYPE.API,
       subType: API_SUB_TYPE.ERROR_HTTP_CODE,
       url: data.url,
       method: data.method,
       statusCode: data.statusCode,
-      errorReason: data.errorReason
+      errorReason: data.errorReason || ''
     }
   }
 }
@@ -145,7 +159,7 @@ class BusinessErrorCollector implements DataCollectorStrategy {
     return data.errorCode && this.errorCodes.includes(data.errorCode)
   }
 
-  collect(data: any): ApiErrorBusinessCode {
+  async collect(data: any): Promise<ApiErrorBusinessCode> {
     return {
       type: MONITOR_TYPE.API,
       subType: API_SUB_TYPE.ERROR_BUSINESS_CODE,
@@ -153,7 +167,7 @@ class BusinessErrorCollector implements DataCollectorStrategy {
       method: data.method,
       statusCode: data.statusCode,
       errorCode: data.errorCode,
-      errorReason: data.errorReason
+      errorReason: data.errorReason || ''
     }
   }
 }
@@ -180,10 +194,10 @@ class RequestDataCollector {
   /**
    * 收集所有符合条件的数据
    */
-  collect(data: any): void {
-    this.strategies.forEach((strategy) => {
+  async collect(data: any): Promise<void> {
+    this.strategies.forEach(async (strategy) => {
       if (strategy.shouldCollect(data)) {
-        const collectedData = strategy.collect(data)
+        const collectedData = await strategy.collect(data)
         this.notify(collectedData)
       }
     })
