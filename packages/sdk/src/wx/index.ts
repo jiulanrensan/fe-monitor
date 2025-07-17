@@ -20,11 +20,10 @@ export class WXCore extends Core<WXOptionsType> {
   }
   transform(data: ReportData): any {
     if (!data) return data
-    const { brand, model, platform } = this.wxSettings
+    const { model, platform } = this.wxSettings
     const { pid, aid, sid, uid } = this.getOptions()
     const reportData = {
       ...data,
-      brand,
       model,
       platform,
       pid,
