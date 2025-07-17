@@ -22,7 +22,12 @@ export class ClickHouseService {
       const summaryHeader = responseHeaders['x-clickhouse-summary']
       const summary = JSON.parse(
         Array.isArray(summaryHeader) ? summaryHeader[0] || '{}' : summaryHeader || '{}'
-      )
+      ) as {
+        read_rows?: string
+        read_bytes?: string
+        total_rows_to_read?: string
+        elapsed_ns?: string
+      }
       const data = await result.json<T>()
       return {
         data,

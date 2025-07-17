@@ -1,8 +1,7 @@
 export interface MonitorConfig {
   // 通用配置
-  defaultAid: string
-  defaultThreshold: number
-
+  pid: string
+  dingTalkWebhookUrl: string
   // 定时任务配置
   scheduler: {
     cronExpression: string // cron表达式
@@ -40,34 +39,33 @@ export interface MonitorConfig {
  * todo 抽离到配置文件中
  */
 export const defaultMonitorConfig: MonitorConfig = {
-  defaultAid: 'app_001',
-  defaultThreshold: 2,
-
+  pid: 'jz_miniapp',
+  dingTalkWebhookUrl: '',
   // 定时任务配置
   scheduler: {
-    cronExpression: '0 */10 * * * *', // 每10分钟执行一次
-    timeRangeMinutes: 10 // 监控最近10分钟的数据
+    cronExpression: '0 */5 * * * *', // 每10分钟执行一次
+    timeRangeMinutes: 5 // 监控最近10分钟的数据
   },
 
   apiDuration: {
     duration: 200, // 200ms
-    threshold: 2
+    threshold: 10
   },
 
   apiBodySize: {
-    reqBodySize: 0, // 0kb
+    reqBodySize: 200, // 0kb
     resBodySize: 200, // 200kb
-    threshold: 2
+    threshold: 10
   },
 
   apiErrorHttpCode: {
     statusCode: 400,
     useGreaterEqual: true,
-    threshold: 1
+    threshold: 10
   },
 
   apiErrorBusinessCode: {
     errorCodes: [500],
-    threshold: 1
+    threshold: 10
   }
 }

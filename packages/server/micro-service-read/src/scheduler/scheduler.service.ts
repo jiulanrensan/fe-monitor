@@ -97,24 +97,24 @@ export class SchedulerService implements OnModuleInit {
   private async monitorApiDuration(): Promise<void> {
     try {
       const timeRange = this.getMonitorTimeRange()
-      const now = new Date()
-
-      const config = defaultMonitorConfig.apiDuration
-      const aid = defaultMonitorConfig.defaultAid
+      const { dingTalkWebhookUrl, apiDuration: config, pid } = defaultMonitorConfig
 
       const result = await this.queryService.apiDurationCount(
         timeRange,
         config.duration,
-        aid,
+        pid,
         config.threshold
       )
 
       if (this.alertService.shouldAlert(result.data)) {
         await this.alertService.handleAlert({
+          project: pid,
+          env: process.env.NODE_ENV,
+          dingTalkWebhookUrl,
           eventName: 'api-duration-monitor',
           data: result.data,
           stats: result.stats,
-          timestamp: now.toISOString(),
+          timeRange: timeRange,
           description: `发现${result.data.length}个API接口耗时超过${config.duration}ms`
         })
       }
@@ -129,14 +129,11 @@ export class SchedulerService implements OnModuleInit {
   private async monitorApiBodySize(): Promise<void> {
     try {
       const timeRange = this.getMonitorTimeRange()
-      const now = new Date()
-
-      const config = defaultMonitorConfig.apiBodySize
-      const aid = defaultMonitorConfig.defaultAid
+      const { dingTalkWebhookUrl, apiBodySize: config, pid } = defaultMonitorConfig
 
       const result = await this.queryService.apiBodySizeCount(
         timeRange,
-        aid,
+        pid,
         config.reqBodySize,
         config.resBodySize,
         config.threshold
@@ -144,10 +141,13 @@ export class SchedulerService implements OnModuleInit {
 
       if (this.alertService.shouldAlert(result.data)) {
         await this.alertService.handleAlert({
-          eventName: 'api-body-size-monitor',
+          project: pid,
+          env: process.env.NODE_ENV,
+          dingTalkWebhookUrl,
+          eventName: 'pi-body-size-monitor',
           data: result.data,
           stats: result.stats,
-          timestamp: now.toISOString(),
+          timeRange: timeRange,
           description: `发现${result.data.length}个API接口请求体大小超过阈值`
         })
       }
@@ -162,14 +162,11 @@ export class SchedulerService implements OnModuleInit {
   private async monitorApiErrorHttpCode(): Promise<void> {
     try {
       const timeRange = this.getMonitorTimeRange()
-      const now = new Date()
-
-      const config = defaultMonitorConfig.apiErrorHttpCode
-      const aid = defaultMonitorConfig.defaultAid
+      const { dingTalkWebhookUrl, apiErrorHttpCode: config, pid } = defaultMonitorConfig
 
       const result = await this.queryService.apiErrorHttpCodeCount(
         timeRange,
-        aid,
+        pid,
         config.statusCode,
         config.useGreaterEqual,
         config.threshold
@@ -177,10 +174,13 @@ export class SchedulerService implements OnModuleInit {
 
       if (this.alertService.shouldAlert(result.data)) {
         await this.alertService.handleAlert({
+          project: pid,
+          env: process.env.NODE_ENV,
+          dingTalkWebhookUrl,
           eventName: 'api-error-http-code-monitor',
           data: result.data,
           stats: result.stats,
-          timestamp: now.toISOString(),
+          timeRange: timeRange,
           description: `发现${result.data.length}个API接口HTTP错误状态码异常`
         })
       }
@@ -195,24 +195,24 @@ export class SchedulerService implements OnModuleInit {
   private async monitorApiErrorBusinessCode(): Promise<void> {
     try {
       const timeRange = this.getMonitorTimeRange()
-      const now = new Date()
-
-      const config = defaultMonitorConfig.apiErrorBusinessCode
-      const aid = defaultMonitorConfig.defaultAid
+      const { dingTalkWebhookUrl, apiErrorBusinessCode: config, pid } = defaultMonitorConfig
 
       const result = await this.queryService.apiErrorBusinessCodeCount(
         timeRange,
-        aid,
+        pid,
         config.errorCodes,
         config.threshold
       )
 
       if (this.alertService.shouldAlert(result.data)) {
         await this.alertService.handleAlert({
+          project: pid,
+          env: process.env.NODE_ENV,
+          dingTalkWebhookUrl,
           eventName: 'api-error-business-code-monitor',
           data: result.data,
           stats: result.stats,
-          timestamp: now.toISOString(),
+          timeRange: timeRange,
           description: `发现${result.data.length}个API接口业务错误码异常`
         })
       }
