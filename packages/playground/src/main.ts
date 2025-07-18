@@ -12,7 +12,7 @@ const { regenerateSessionId, reportLog } = init({
 })
 setTimeout(() => {
   reportLog({
-    logContent: 'testtesttesttest'
+    content: 'testtesttesttest'
   })
 }, 5000)
 import App from './App.vue'
