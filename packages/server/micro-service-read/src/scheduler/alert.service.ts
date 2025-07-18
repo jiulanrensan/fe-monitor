@@ -86,58 +86,56 @@ export class AlertService {
       alertData
 
     // 构建消息内容
-    let message = `项目: ${project}\n\n`
-    message += `环境: ${env || 'dev'}\n\n`
-    message += `${description}\n\n`
-    message += `时间范围: ${timeRange.start} - ${timeRange.end}\n\n`
-    message += `统计信息: ${stats}\n\n`
+    let message = ''
+    message += `- **项目**: ${project}\n`
+    message += `- **环境**: ${env || 'dev'}\n`
+    message += `- **描述**: ${description}\n`
+    message += `- **时间范围**: ${timeRange.start} - ${timeRange.end}\n`
+    message += `- **统计信息**: ${stats}\n`
+    message += `- [查看详情](https://www.baidu.com)\n`
 
     // 添加数据详情
     data.forEach((item, index) => {
-      message += `\n\n`
       Object.entries(item).forEach(([key, value]) => {
-        message += `${key.toUpperCase()}: ${value}\n\n`
+        if (key.includes('url')) {
+          message += `- **${key.toUpperCase()}**: ${value}\n`
+        } else {
+          message += `  - **${key.toUpperCase()}**: ${value}\n`
+        }
       })
-      message += `\n\n`
     })
 
     // 钉钉机器人消息格式
     const dingTalkMessage = {
-      msgtype: 'actionCard',
-      actionCard: {
+      msgtype: 'markdown',
+      markdown: {
         title: '监控告警',
-        text: message,
-        btnOrientation: '0',
-        singleTitle: '查看详情',
-        singleURL: 'https://www.baidu.com'
+        text: message
       }
     }
 
-    // this.logger.log(`${JSON.stringify(dingTalkMessage)}`)
+    try {
+      this.logger.log(`正在发送钉钉告警消息到: ${dingTalkWebhookUrl}`)
 
-    // try {
-    //   this.logger.log(`正在发送钉钉告警消息到: ${dingTalkWebhookUrl}`)
+      const response = await fetch(dingTalkWebhookUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(dingTalkMessage)
+      })
 
-    //   const response = await fetch(dingTalkWebhookUrl, {
-    //     method: 'POST',
-    //     headers: {
-    //       'Content-Type': 'application/json'
-    //     },
-    //     body: JSON.stringify(dingTalkMessage)
-    //   })
+      if (!response.ok) {
+        const errorText = await response.text()
+        throw new Error(`HTTP ${response.status}: ${errorText}`)
+      }
 
-    //   if (!response.ok) {
-    //     const errorText = await response.text()
-    //     throw new Error(`HTTP ${response.status}: ${errorText}`)
-    //   }
-
-    //   const result = await response.json()
-    //   this.logger.log(`钉钉告警发送成功: ${JSON.stringify(result)}`)
-    // } catch (error) {
-    //   this.logger.error(`钉钉告警发送失败: ${error.message}`)
-    //   this.logger.error(`错误详情: ${error.stack}`)
-    //   throw error
-    // }
+      const result = await response.json()
+      this.logger.log(`钉钉告警发送成功: ${JSON.stringify(result)}`)
+    } catch (error) {
+      this.logger.error(`钉钉告警发送失败: ${error.message}`)
+      this.logger.error(`错误详情: ${error.stack}`)
+    }
   }
 
   /**
