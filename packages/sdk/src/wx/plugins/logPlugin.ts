@@ -5,9 +5,32 @@ import { PluginOption } from '../type'
 type LogPluginOption = PluginOption & {}
 
 export type ReportLogType = {
-  logType?: 'log' | 'error'
-  logContent: string
-  logKeywords?: string
+  type?: 'log' | 'error'
+  content: string
+  keywords?: string
+}
+
+/**
+ * 将 key 加上 log 前缀并转为驼峰命名
+ */
+type AddLogPrefix<T> = {
+  [K in keyof T as K extends string ? `log${Capitalize<K>}` : never]: T[K]
+}
+
+type ReportLogData = AddLogPrefix<ReportLogType>
+
+function addLogPrefix(data: ReportLogType): ReportLogData {
+  const newData = {} as ReportLogData
+
+  Object.entries(data).forEach(([key, value]) => {
+    if (value !== undefined) {
+      const camelKey = key.charAt(0).toUpperCase() + key.slice(1)
+      const logKey = `log${camelKey}` as keyof ReportLogData
+      ;(newData as any)[logKey] = value
+    }
+  })
+
+  return newData
 }
 
 // 创建一个插件实例类来管理状态
@@ -25,11 +48,11 @@ class LogPluginInstance {
       return
     }
 
-    console.log('reportLog', data)
+    console.log('reportLog', addLogPrefix(data))
     this.notify(
       {
         type: MONITOR_TYPE.FRE_LOG,
-        ...data
+        ...addLogPrefix(data)
       },
       CALLBACK_TYPE.DIRECT_SEND
     )
@@ -50,7 +73,7 @@ function logPlugin(): BasePluginType {
     monitor(notify) {
       logPluginInstance.bindNotify(notify)
     },
-    transform(data: ReportLogType) {
+    transform(data: ReportLogData) {
       return {
         ...data,
         logType: data.logType || 'log'
