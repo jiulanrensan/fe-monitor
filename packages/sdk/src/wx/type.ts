@@ -1,5 +1,6 @@
 import { API_SUB_TYPE, MONITOR_TYPE } from '@/core/constant'
 import { BaseOptionsType, IAnyObject } from '../core/type'
+import { RequestPluginOption } from './plugins/requestPlugin'
 
 export type WXOptionsType = BaseOptionsType & {
   /**
@@ -13,6 +14,10 @@ export type WXOptionsType = BaseOptionsType & {
     ) => void,
     reject: (reason?: any) => void
   ) => WechatMiniprogram.RequestOption
+  /**
+   * 内置请求plugin参数
+   */
+  requestPluginOption?: RequestPluginOption
 }
 
 export type PluginOption = IAnyObject

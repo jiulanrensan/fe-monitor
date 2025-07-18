@@ -65,8 +65,8 @@ export class WXCore extends Core<WXOptionsType> {
 
 const init = (options: WXOptionsType) => {
   const client = new WXCore(options)
-  const { plugins = [] } = options
-  client.use([requestPlugin(), onAppHidePlugin(), logPlugin(), ...plugins])
+  const { plugins = [], requestPluginOption = {} } = options
+  client.use([requestPlugin(requestPluginOption), onAppHidePlugin(), logPlugin(), ...plugins])
   return {
     regenerateSessionId: client.regenerateSessionId.bind(client),
     reportLog

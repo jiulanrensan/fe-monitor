@@ -2,11 +2,26 @@ import { BasePluginType, NotifyFunc } from '@/core/type'
 import { ApiReport, PluginOption } from '../type'
 import { MONITOR_TYPE, API_SUB_TYPE } from '@/core/constant'
 
-type RequestPluginOption = PluginOption & {
+export type RequestPluginOption = PluginOption & {
+  /**
+   * 耗时阈值
+   */
   duration?: number
+  /**
+   * 请求体大小阈值
+   */
   reqBodySized?: number
+  /**
+   * 响应体大小阈值
+   */
   resBodySize?: number
+  /**
+   * 错误HTTP码，支持数组和单个数字
+   */
   errorHttpCode?: Array<number> | number
+  /**
+   * 错误业务码，支持数组
+   */
   errorBusinessCode?: Array<number>
 }
 
