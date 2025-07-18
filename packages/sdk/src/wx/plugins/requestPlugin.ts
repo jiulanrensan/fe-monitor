@@ -233,7 +233,7 @@ class RequestDataCollector {
       url,
       method,
       duration,
-      statusCode,
+      statusCode: statusCode || businessCode || '',
       queueStart,
       queueEnd,
       businessCode,
@@ -260,7 +260,7 @@ class RequestDataCollector {
       method,
       duration,
       errorReason: errMsg,
-      errCode: errno,
+      statusCode: errno,
       reqPage: route,
       resPage: route
     })
